@@ -14,29 +14,29 @@ const whyChooseUs = [
 
 const About = () => {
   return (
-    <section id="about" className="py-20 bg-gradient-to-b from-muted/30 to-background">
+    <section id="about" className="py-12 md:py-20 bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-          <div className="space-y-6 animate-fade-in">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-6xl mx-auto">
+          <div className="space-y-4 md:space-y-6 animate-fade-in">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
               Why Choose Natural?
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
               At BRIMSTONE, we believe that beauty comes from nature. Our products are
               carefully handcrafted using traditional cold-pressed methods to preserve the
               natural goodness of every ingredient.
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
               Each soap is made with love, ensuring that you receive only the finest quality
               products that are gentle on your skin and kind to the environment.
             </p>
 
             <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-foreground mb-4">
+              <CardContent className="p-4 md:p-6">
+                <h3 className="text-lg md:text-xl font-bold text-foreground mb-3 md:mb-4">
                   Our Commitment
                 </h3>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
                   {whyChooseUs.map((item, index) => (
                     <li
                       key={item}

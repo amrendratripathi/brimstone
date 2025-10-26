@@ -6,19 +6,19 @@ import { Mail, Phone, Instagram, Send } from "lucide-react";
 
 const Contact = () => {
   return (
-    <section id="contact" className="py-20 bg-muted/30">
+    <section id="contact" className="py-12 md:py-20 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        <div className="text-center mb-8 md:mb-16 animate-fade-in">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2 md:mb-4">
             Get In Touch
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Have questions? We'd love to hear from you. Send us a message and we'll respond
             as soon as possible.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-12 max-w-6xl mx-auto">
           <div className="space-y-6 animate-fade-in">
             <Card className="bg-card border-border">
               <CardContent className="p-6">

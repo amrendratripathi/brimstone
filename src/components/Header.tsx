@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag } from "lucide-react";
+import { Menu, X, ShoppingBag, ChevronDown } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,6 +21,32 @@ const Header = () => {
     { label: "Catagories", href: "#products" },
     { label: "About", href: "#about" },
     { label: "Contact", href: "#contact" },
+  ];
+
+  const mobileMenuSections = [
+    {
+      title: "Shop",
+      items: [
+        { label: "All Products", href: "/shop" },
+        { label: "Categories", href: "#products" },
+      ],
+    },
+    {
+      title: "About",
+      items: [
+        { label: "Our Story", href: "#about" },
+        { label: "CEO", href: "#about" },
+        { label: "Donation", href: "#about" },
+      ],
+    },
+    {
+      title: "Contact",
+      items: [
+        { label: "Email Us", href: "#contact" },
+        { label: "Call Us", href: "#contact" },
+        { label: "Instagram", href: "https://instagram.com/brimstonebathnbeauti" },
+      ],
+    },
   ];
 
   return (
@@ -77,20 +104,49 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 flex flex-col gap-4 animate-fade-in">
-            {navLinks.map((link) => (
+          <nav className="md:hidden mt-4 pb-4 flex flex-col gap-2 animate-fade-in bg-card border border-border rounded-lg p-4">
+            {navLinks.slice(0, 1).map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-foreground hover:text-primary transition-colors duration-300 py-2"
+                className="text-foreground hover:text-primary transition-colors duration-300 py-2 font-medium"
               >
                 {link.label}
               </a>
             ))}
-            <Button className="bg-primary hover:bg-primary/90 mt-2" asChild>
-              <a href="/shop">Shop Now</a>
-            </Button>
+            
+            {/* Dropdown Sections */}
+            {mobileMenuSections.map((section) => (
+              <div key={section.title} className="border-t border-border pt-2">
+                <button
+                  onClick={() => setOpenDropdown(openDropdown === section.title ? null : section.title)}
+                  className="w-full flex items-center justify-between py-2 text-foreground hover:text-primary transition-colors font-medium"
+                >
+                  <span>{section.title}</span>
+                  <ChevronDown 
+                    className={`w-4 h-4 transition-transform ${openDropdown === section.title ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {openDropdown === section.title && (
+                  <div className="pl-4 mt-2 space-y-1">
+                    {section.items.map((item) => (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setOpenDropdown(null);
+                        }}
+                        className="block py-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </nav>
         )}
       </div>
