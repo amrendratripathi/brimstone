@@ -160,7 +160,7 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main>
+      <main id="home">
         <section className="pt-20 pb-12 bg-gradient-to-b from-primary/10 to-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">

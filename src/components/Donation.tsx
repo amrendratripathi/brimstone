@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import donationImage from "@/assets/categories/donation.png";
 
 const Donation = () => {
@@ -13,9 +13,10 @@ const Donation = () => {
         }}
       />
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="w-full px-2 xs:px-3 sm:px-4 relative z-10 max-w-6xl mx-auto">
         <Card className="p-6 md:p-12 lg:p-16 bg-card border-2 border-primary/20 shadow-lg">
-          <div className="max-w-4xl mx-auto text-center space-y-4 md:space-y-6">
+          <CardContent className="p-0">
+            <div className="max-w-4xl mx-auto text-center space-y-4 md:space-y-6">
             <div className="flex justify-center mb-4 md:mb-6">
               <div className="p-3 md:p-4 bg-primary/10 rounded-full">
                 <Heart className="w-8 h-8 md:w-12 md:h-12 text-primary" fill="currentColor" />
@@ -48,7 +49,19 @@ const Donation = () => {
                 Thank you for being part of our journey 💙
               </span>
             </div>
+            
+            {/* Donation Image */}
+            <div className="mt-8 flex justify-center">
+              <div className="w-full max-w-md rounded-lg overflow-hidden shadow-lg">
+                <img
+                  src={donationImage}
+                  alt="Children supported by our donations"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </div>
           </div>
+          </CardContent>
         </Card>
       </div>
     </section>

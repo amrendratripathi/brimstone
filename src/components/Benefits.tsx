@@ -36,12 +36,12 @@ const benefits = [
 const Benefits = () => {
   return (
     <section className="py-12 md:py-20 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8 md:mb-16 animate-fade-in">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2 md:mb-4">
+      <div className="w-full px-2 xs:px-3 sm:px-4">
+        <div className="text-center mb-8 md:mb-16 animate-fade-in max-w-6xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2 md:mb-4">
             Natural Benefits
           </h2>
-          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+          <p className="text-sm sm:text-base md:text-xl text-muted-foreground max-w-2xl mx-auto px-2 sm:px-4">
             Experience the transformative power of nature with every use
           </p>
         </div>

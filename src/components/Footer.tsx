@@ -90,17 +90,26 @@ const Footer = () => {
         <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground space-y-2">
           <p>&copy; {new Date().getFullYear()} BRIMSTONE. All rights reserved.</p>
           <p className="mt-1">Handcrafted with love for your natural beauty</p>
-          <p className="mt-2 text-base">
-            Built with ❤️ by{' '}
-            <a 
-              href="https://amrendra.engineer" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary hover:underline font-semibold text-lg"
-            >
-              Amrendra Tripathi
-            </a>
-          </p>
+              <p className="mt-2 text-base">
+                Built with ❤️ by{' '}
+                <a
+                  href="https://amrendra.engineer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-semibold text-lg"
+                >
+                  Amrendra Tripathi
+                </a>
+                {' '}
+                <a
+                  href="https://instagram.com/amrendratripathi06"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary hover:text-accent transition-colors ml-3"
+                >
+                  <Instagram className="w-6 h-6" />
+                </a>
+              </p>
         </div>
       </div>
     </footer>

@@ -77,14 +77,17 @@ const Shuffle: React.FC<ShuffleProps> = ({
   useGSAP(
     () => {
       if (!ref.current || !text || !fontsLoaded) return;
-      if (respectReducedMotion && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        onShuffleComplete?.();
-        return;
-      }
+    if (respectReducedMotion && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onShuffleComplete?.();
+      return;
+    }
+
+    // Force animation on mobile by reducing threshold
+    const mobileThreshold = window.innerWidth < 768 ? 0.1 : threshold;
 
       const el = ref.current as HTMLElement;
 
-      const startPct = (1 - threshold) * 100;
+      const startPct = (1 - mobileThreshold) * 100;
       const mm = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin || '');
       const mv = mm ? parseFloat(mm[1]) : 0;
       const mu = mm ? mm[2] || 'px' : 'px';
@@ -308,12 +311,20 @@ const Shuffle: React.FC<ShuffleProps> = ({
         setReady(true);
       };
 
-      const st = ScrollTrigger.create({
-        trigger: el,
-        start,
-        once: triggerOnce,
-        onEnter: create
-      });
+    const st = ScrollTrigger.create({
+      trigger: el,
+      start,
+      once: triggerOnce,
+      onEnter: create,
+      // Force animation on mobile
+      onUpdate: () => {
+        if (window.innerWidth < 768 && !ready) {
+          create();
+        }
+      },
+      // Ensure animation triggers immediately on mobile
+      immediateRender: window.innerWidth < 768
+    });
 
       return () => {
         st.kill();
@@ -348,13 +359,13 @@ const Shuffle: React.FC<ShuffleProps> = ({
     }
   );
 
-  const baseTw = 'inline-block whitespace-normal break-words will-change-transform uppercase';
+  const baseTw = 'inline-block whitespace-normal break-words will-change-transform uppercase leading-none';
   const commonStyle: React.CSSProperties = {
     textAlign,
     ...style
   };
 
-  const classes = `${baseTw} ${ready ? 'visible' : 'invisible'} ${className}`.trim();
+  const classes = `${baseTw} ${ready ? 'visible' : 'opacity-100'} ${className}`.trim();
   const Tag = (tag || 'p') as keyof JSX.IntrinsicElements;
 
   return React.createElement(Tag, { ref: ref as any, className: classes, style: commonStyle }, text);

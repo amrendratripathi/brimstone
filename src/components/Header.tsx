@@ -17,7 +17,7 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { label: "Home", href: "#home" },
+    { label: "Home", href: "/" },
     { label: "Catagories", href: "#products" },
     { label: "About", href: "#about" },
     { label: "Contact", href: "#contact" },
@@ -34,16 +34,16 @@ const Header = () => {
     {
       title: "About",
       items: [
-        { label: "Our Story", href: "#about" },
-        { label: "CEO", href: "#about" },
-        { label: "Donation", href: "#about" },
+        { label: "Our Story", href: "/#about" },
+        { label: "CEO", href: "/#about" },
+        { label: "Donation", href: "/#about" },
       ],
     },
     {
       title: "Contact",
       items: [
-        { label: "Email Us", href: "#contact" },
-        { label: "Call Us", href: "#contact" },
+        { label: "Email Us", href: "/#contact" },
+        { label: "Call Us", href: "/#contact" },
         { label: "Instagram", href: "https://instagram.com/brimstonebathnbeauti" },
       ],
     },
@@ -55,17 +55,17 @@ const Header = () => {
         isScrolled ? "bg-card/95 backdrop-blur-md shadow-md" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <a href="#home" className="flex items-center gap-3 group">
+      <div className="w-full px-2 xs:px-3 sm:px-4 py-2 xs:py-3 sm:py-4">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <a href="#home" className="flex items-center gap-1 xs:gap-2 sm:gap-3 group">
             <img
               src={logo}
               alt="BRIMSTONE"
-              className="w-12 h-12 rounded-full transition-transform duration-300 group-hover:scale-110"
+              className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full transition-transform duration-300 group-hover:scale-110"
             />
             <div>
-              <h1 className="text-xl font-bold text-foreground">BRIMSTONE</h1>
-              <p className="text-xs text-muted-foreground">Spark of wild beauty</p>
+              <h1 className="text-xs xs:text-sm sm:text-lg md:text-xl font-bold text-foreground">BRIMSTONE</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Spark of wild beauty</p>
             </div>
           </a>
 
@@ -95,16 +95,16 @@ const Header = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden flex-shrink-0"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X /> : <Menu />}
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 flex flex-col gap-2 animate-fade-in bg-card border border-border rounded-lg p-4">
+          <nav className="md:hidden mt-2 pb-2 flex flex-col gap-2 animate-fade-in bg-card border border-border rounded-lg p-2 xs:p-3 mx-2 xs:mx-3 sm:mx-0">
             {navLinks.slice(0, 1).map((link) => (
               <a
                 key={link.label}

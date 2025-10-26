@@ -15,8 +15,8 @@ const whyChooseUs = [
 const About = () => {
   return (
     <section id="about" className="py-12 md:py-20 bg-gradient-to-b from-muted/30 to-background">
-      <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-6xl mx-auto">
+      <div className="w-full px-2 xs:px-3 sm:px-4">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center max-w-6xl mx-auto">
           <div className="space-y-4 md:space-y-6 animate-fade-in">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
               Why Choose Natural?

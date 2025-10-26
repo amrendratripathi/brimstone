@@ -1,10 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
+import ceoImage from "@/assets/categories/CEO.png";
 
 const CEO = () => {
+
   return (
-    <section className="py-12 md:py-20 bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4">
+    <section id="about" className="py-12 md:py-20 bg-gradient-to-b from-background to-muted/20 relative">
+      <div className="w-full px-2 xs:px-3 sm:px-4 max-w-6xl mx-auto">
         <Card className="p-6 md:p-12 lg:p-16 bg-card border-2 border-primary/20 shadow-lg">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8 md:mb-12">
@@ -49,16 +51,19 @@ const CEO = () => {
               </div>
 
               <div className="flex justify-center md:justify-end">
-                <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                  <div className="w-28 h-28 md:w-44 md:h-44 rounded-full bg-card border-2 md:border-4 border-primary/20 flex items-center justify-center">
-                    <Sparkles className="w-12 h-12 md:w-20 md:h-20 text-primary/40" />
-                  </div>
+                <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg">
+                  <img
+                    src={ceoImage}
+                    alt="Shruti Tripathi - Founder & CEO"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </Card>
       </div>
+
     </section>
   );
 };
