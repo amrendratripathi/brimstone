@@ -2,67 +2,45 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/api";
 import { formatINR } from "@/lib/pricing";
+import { useProducts } from "@/contexts/ProductContext";
+import { categoryInfo, defaultProducts, Product } from "@/data/products";
 import {
-  Loader2, ShieldCheck, Truck, PackageCheck,
-  ChevronDown, MapPin, Phone, User, Package, CreditCard,
+  Loader2, ShieldCheck, Truck, PackageCheck, ChevronDown,
+  MapPin, Phone, User, Package, CreditCard, Pencil, Check, X,
+  Plus, Trash2, Image as ImageIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+// ── Types ────────────────────────────────────────────────────────────────────
 type Order = {
-  id?: string;
-  _id?: string;
-  status?: string;
-  createdAt?: string;
+  id?: string; _id?: string; status?: string; createdAt?: string;
   pricing?: { subtotal?: number; gst?: number; delivery?: number; total?: number };
   total?: number;
   customer?: { name?: string; mobileno?: string; email?: string };
-  shippingAddress?: {
-    fullName?: string;
-    mobile?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    city?: string;
-    state?: string;
-    pin?: string;
-    notes?: string;
-  };
+  shippingAddress?: { fullName?: string; mobile?: string; addressLine1?: string; addressLine2?: string; city?: string; state?: string; pin?: string; notes?: string };
   items?: { name: string; qty: number; price: number }[];
 };
 
-function getId(o: Order) {
-  return o.id || o._id || "";
-}
-
-function badgeVariant(status?: string) {
-  const s = (status || "").toLowerCase();
-  if (s === "confirmed") return "default";
-  if (s === "delivered") return "secondary";
-  if (s === "shipped") return "outline";
-  return "outline";
-}
-
-function badgeColor(status?: string) {
-  const s = (status || "").toLowerCase();
-  if (s === "confirmed") return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-  if (s === "delivered") return "bg-green-500/10 text-green-600 border-green-500/20";
-  if (s === "shipped") return "bg-amber-500/10 text-amber-600 border-amber-500/20";
+function getId(o: Order) { return o.id || o._id || ""; }
+function badgeColor(s?: string) {
+  const v = (s || "").toLowerCase();
+  if (v === "confirmed") return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+  if (v === "delivered") return "bg-green-500/10 text-green-600 border-green-500/20";
+  if (v === "shipped") return "bg-amber-500/10 text-amber-600 border-amber-500/20";
   return "bg-orange-500/10 text-orange-500 border-orange-500/20";
 }
-
-function formatDate(iso?: string) {
+function fmtDate(iso?: string) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
+  return new Date(iso).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-export default function AdminPage() {
+// ── Orders Section ────────────────────────────────────────────────────────────
+function OrdersSection() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -73,243 +51,118 @@ export default function AdminPage() {
       const res = await apiRequest<{ orders: Order[] } | Order[]>("/api/orders/admin/all-orders", { method: "GET" });
       if (res.ok) {
         const list = (res.data as any)?.orders ?? res.data;
-        const arr = Array.isArray(list) ? list : [];
-        setOrders(arr.filter((o) => (o.status || "").toLowerCase() !== "delivered"));
-      } else {
-        setOrders([]);
-        toast.error("Failed to fetch orders.");
-      }
-    } finally {
-      setLoading(false);
-    }
+        setOrders(Array.isArray(list) ? list.filter((o) => (o.status || "").toLowerCase() !== "delivered") : []);
+      } else toast.error("Failed to fetch orders.");
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    load().catch(() => {});
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const updateStatus = async (orderId: string, status: "confirmed" | "shipped" | "delivered") => {
     const res = await apiRequest(`/api/orders/${orderId}/status`, { method: "PUT", json: { status } });
     if (res.ok) {
       toast.success(`Order marked as ${status}`);
-      setOrders((prev) =>
-        status === "delivered"
-          ? prev.filter((o) => getId(o) !== orderId)
-          : prev.map((o) => (getId(o) === orderId ? { ...o, status } : o)),
-      );
-    } else {
-      toast.error(res.data?.message || "Failed to update status.");
-    }
-  };
-
-  const toggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+      setOrders((prev) => status === "delivered"
+        ? prev.filter((o) => getId(o) !== orderId)
+        : prev.map((o) => getId(o) === orderId ? { ...o, status } : o));
+    } else toast.error(res.data?.message || "Failed to update.");
   };
 
   const byStatus = useMemo(() => {
-    const groups: Record<string, Order[]> = { pending: [], confirmed: [], shipped: [] };
+    const g: Record<string, Order[]> = { pending: [], confirmed: [], shipped: [] };
     for (const o of orders) {
       const s = (o.status || "pending").toLowerCase();
-      if (s === "confirmed") groups.confirmed.push(o);
-      else if (s === "shipped") groups.shipped.push(o);
-      else groups.pending.push(o);
+      if (s === "confirmed") g.confirmed.push(o);
+      else if (s === "shipped") g.shipped.push(o);
+      else g.pending.push(o);
     }
-    return groups;
+    return g;
   }, [orders]);
 
   const renderList = (list: Order[]) => {
-    if (loading) {
-      return (
-        <div className="py-12 flex items-center justify-center text-muted-foreground gap-2">
-          <Loader2 className="w-4 h-4 animate-spin" /> Loading orders...
-        </div>
-      );
-    }
+    if (loading) return <div className="py-12 flex items-center justify-center text-muted-foreground gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading...</div>;
     if (!list.length) return <div className="py-12 text-center text-muted-foreground">No orders.</div>;
-
     return (
       <div className="space-y-3">
         {list.map((o) => {
           const id = getId(o);
           const total = Number(o.pricing?.total ?? o.total ?? 0);
-          const isExpanded = expandedId === id;
+          const isOpen = expandedId === id;
           const addr = o.shippingAddress;
           const cust = o.customer;
-
           return (
-            <Card
-              key={id}
-              className={`border-border transition-all duration-200 ${isExpanded ? "border-primary/40 shadow-md" : "hover:border-border/80"}`}
-            >
-              {/* ── Header row (always visible, click to expand) ── */}
-              <button
-                className="w-full text-left"
-                onClick={() => toggleExpand(id)}
-                aria-expanded={isExpanded}
-              >
+            <Card key={id} className={`border-border transition-all duration-200 ${isOpen ? "border-primary/40 shadow-md" : "hover:border-border/80"}`}>
+              <button className="w-full text-left" onClick={() => setExpandedId(isOpen ? null : id)}>
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex flex-col gap-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-foreground">
-                            Order #{id.slice(-8).toUpperCase()}
-                          </p>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${badgeColor(o.status)}`}>
-                            {(o.status || "pending").charAt(0).toUpperCase() + (o.status || "pending").slice(1)}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {cust?.name || addr?.fullName || "Customer"} • {cust?.mobileno || addr?.mobile || "—"} • {formatDate(o.createdAt)}
-                        </p>
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-foreground">Order #{id.slice(-8).toUpperCase()}</p>
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${badgeColor(o.status)}`}>
+                          {(o.status || "pending").charAt(0).toUpperCase() + (o.status || "pending").slice(1)}
+                        </span>
                       </div>
+                      <p className="text-sm text-muted-foreground">{cust?.name || addr?.fullName || "Customer"} • {cust?.mobileno || addr?.mobile || "—"} • {fmtDate(o.createdAt)}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-foreground text-base">{formatINR(total)}</span>
-                      <ChevronDown
-                        className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
-                      />
+                      <span className="font-bold text-foreground">{formatINR(total)}</span>
+                      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                     </div>
                   </div>
                 </CardContent>
               </button>
 
-              {/* ── Expanded delivery details ── */}
-              {isExpanded && (
-                <CardContent className="px-5 pb-5 pt-0 border-t border-border/50 animate-fade-in">
+              {isOpen && (
+                <CardContent className="px-5 pb-5 pt-0 border-t border-border/50">
                   <div className="grid sm:grid-cols-2 gap-5 mt-4">
-
-                    {/* Delivery address */}
                     <div className="space-y-2">
-                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary" /> Delivery Address
-                      </h4>
-                      <div className="text-sm text-muted-foreground space-y-0.5 bg-muted/30 rounded-lg p-3">
+                      <h4 className="text-sm font-semibold flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" /> Delivery Address</h4>
+                      <div className="text-sm text-muted-foreground bg-muted/30 rounded-lg p-3 space-y-0.5">
                         <p className="font-medium text-foreground">{addr?.fullName || cust?.name || "—"}</p>
                         {addr?.addressLine1 && <p>{addr.addressLine1}</p>}
                         {addr?.addressLine2 && <p>{addr.addressLine2}</p>}
-                        {(addr?.city || addr?.state || addr?.pin) && (
-                          <p>
-                            {[addr.city, addr.state, addr.pin].filter(Boolean).join(", ")}
-                          </p>
-                        )}
-                        {addr?.notes && (
-                          <p className="mt-1 italic text-xs text-muted-foreground/80">📝 {addr.notes}</p>
-                        )}
+                        {(addr?.city || addr?.state || addr?.pin) && <p>{[addr.city, addr.state, addr.pin].filter(Boolean).join(", ")}</p>}
+                        {addr?.notes && <p className="italic text-xs">📝 {addr.notes}</p>}
                       </div>
                     </div>
-
-                    {/* Customer contact */}
                     <div className="space-y-2">
-                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-primary" /> Customer Info
-                      </h4>
-                      <div className="text-sm text-muted-foreground space-y-1.5 bg-muted/30 rounded-lg p-3">
-                        {cust?.name && (
-                          <div className="flex items-center gap-2">
-                            <User className="w-3 h-3 shrink-0" />
-                            <span>{cust.name}</span>
-                          </div>
-                        )}
-                        {(cust?.mobileno || addr?.mobile) && (
-                          <div className="flex items-center gap-2">
-                            <Phone className="w-3 h-3 shrink-0" />
-                            <span>{cust?.mobileno || addr?.mobile}</span>
-                          </div>
-                        )}
-                        {cust?.email && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs">✉</span>
-                            <span className="truncate">{cust.email}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 mt-1 pt-1 border-t border-border/30">
-                          <span className="text-xs">🕐</span>
-                          <span className="text-xs">{formatDate(o.createdAt)}</span>
-                        </div>
+                      <h4 className="text-sm font-semibold flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-primary" /> Customer Info</h4>
+                      <div className="text-sm text-muted-foreground bg-muted/30 rounded-lg p-3 space-y-1.5">
+                        {cust?.name && <div className="flex items-center gap-2"><User className="w-3 h-3" /><span>{cust.name}</span></div>}
+                        {(cust?.mobileno || addr?.mobile) && <div className="flex items-center gap-2"><Phone className="w-3 h-3" /><span>{cust?.mobileno || addr?.mobile}</span></div>}
+                        {cust?.email && <div className="flex items-center gap-2"><span className="text-xs">✉</span><span className="truncate">{cust.email}</span></div>}
+                        <div className="flex items-center gap-2 mt-1 pt-1 border-t border-border/30"><span className="text-xs">🕐</span><span className="text-xs">{fmtDate(o.createdAt)}</span></div>
                       </div>
                     </div>
-
-                    {/* Items ordered */}
                     {o.items && o.items.length > 0 && (
                       <div className="sm:col-span-2 space-y-2">
-                        <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                          <Package className="w-3.5 h-3.5 text-primary" /> Items Ordered
-                        </h4>
+                        <h4 className="text-sm font-semibold flex items-center gap-1.5"><Package className="w-3.5 h-3.5 text-primary" /> Items Ordered</h4>
                         <div className="bg-muted/30 rounded-lg p-3 space-y-2">
                           {o.items.map((item, i) => (
                             <div key={i} className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">
-                                  {item.qty}
-                                </span>
-                                <span className="text-foreground truncate">{item.name}</span>
-                              </div>
-                              <span className="text-muted-foreground shrink-0 ml-2">
-                                {formatINR(item.price * item.qty)}
-                              </span>
+                              <div className="flex items-center gap-2"><span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">{item.qty}</span><span>{item.name}</span></div>
+                              <span className="text-muted-foreground">{formatINR(item.price * item.qty)}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-
-                    {/* Pricing breakdown */}
                     {o.pricing && (
                       <div className="sm:col-span-2 space-y-2">
-                        <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                          <CreditCard className="w-3.5 h-3.5 text-primary" /> Pricing Breakdown
-                        </h4>
+                        <h4 className="text-sm font-semibold flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Pricing</h4>
                         <div className="bg-muted/30 rounded-lg p-3 text-sm space-y-1.5">
-                          <div className="flex justify-between text-muted-foreground">
-                            <span>Subtotal</span>
-                            <span>{formatINR(o.pricing.subtotal ?? 0)}</span>
-                          </div>
-                          <div className="flex justify-between text-muted-foreground">
-                            <span>GST (18%)</span>
-                            <span>{formatINR(o.pricing.gst ?? 0)}</span>
-                          </div>
-                          <div className="flex justify-between text-muted-foreground">
-                            <span>Delivery</span>
-                            <span>{formatINR(o.pricing.delivery ?? 0)}</span>
-                          </div>
-                          <div className="flex justify-between font-semibold text-foreground border-t border-border/50 pt-1.5 mt-1.5">
-                            <span>Total</span>
-                            <span>{formatINR(o.pricing.total ?? 0)}</span>
-                          </div>
+                          <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span>{formatINR(o.pricing.subtotal ?? 0)}</span></div>
+                          <div className="flex justify-between text-muted-foreground"><span>GST (18%)</span><span>{formatINR(o.pricing.gst ?? 0)}</span></div>
+                          <div className="flex justify-between text-muted-foreground"><span>Delivery</span><span>{formatINR(o.pricing.delivery ?? 0)}</span></div>
+                          <div className="flex justify-between font-semibold text-foreground border-t border-border/50 pt-1.5 mt-1.5"><span>Total</span><span>{formatINR(o.pricing.total ?? 0)}</span></div>
                         </div>
                       </div>
                     )}
                   </div>
-
-                  {/* Action buttons */}
                   <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-border/50">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => updateStatus(id, "confirmed")}
-                      className="border-blue-500/40 text-blue-500 hover:bg-blue-500/10"
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-                      Confirm Order
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => updateStatus(id, "shipped")}
-                      className="border-amber-500/40 text-amber-600 hover:bg-amber-500/10"
-                    >
-                      <Truck className="w-3.5 h-3.5 mr-1.5" />
-                      Mark Shipped
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus(id, "delivered")}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      <PackageCheck className="w-3.5 h-3.5 mr-1.5" />
-                      Mark Delivered
-                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => updateStatus(id, "confirmed")} className="border-blue-500/40 text-blue-500 hover:bg-blue-500/10"><ShieldCheck className="w-3.5 h-3.5 mr-1.5" />Confirm</Button>
+                    <Button variant="outline" size="sm" onClick={() => updateStatus(id, "shipped")} className="border-amber-500/40 text-amber-600 hover:bg-amber-500/10"><Truck className="w-3.5 h-3.5 mr-1.5" />Shipped</Button>
+                    <Button size="sm" onClick={() => updateStatus(id, "delivered")} className="bg-green-600 hover:bg-green-700 text-white"><PackageCheck className="w-3.5 h-3.5 mr-1.5" />Delivered</Button>
                   </div>
                 </CardContent>
               )}
@@ -321,31 +174,211 @@ export default function AdminPage() {
   };
 
   return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-muted-foreground">Click any order to view delivery details.</p>
+        <Button variant="outline" size="sm" onClick={load} disabled={loading}>{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}</Button>
+      </div>
+      <Tabs defaultValue="pending">
+        <TabsList className="w-full justify-start mb-4">
+          <TabsTrigger value="pending">Pending ({byStatus.pending.length})</TabsTrigger>
+          <TabsTrigger value="confirmed">Confirmed ({byStatus.confirmed.length})</TabsTrigger>
+          <TabsTrigger value="shipped">Shipped ({byStatus.shipped.length})</TabsTrigger>
+        </TabsList>
+        <TabsContent value="pending">{renderList(byStatus.pending)}</TabsContent>
+        <TabsContent value="confirmed">{renderList(byStatus.confirmed)}</TabsContent>
+        <TabsContent value="shipped">{renderList(byStatus.shipped)}</TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+// ── Add Product Form ──────────────────────────────────────────────────────────
+function AddProductForm({ onAdd, onCancel }: { onAdd: (p: Product) => void; onCancel: () => void }) {
+  const categories = Object.keys(categoryInfo);
+  const [form, setForm] = useState({
+    name: "", subtitle: "", description: "", category: categories[0],
+    weight: "", price: "", priceDisplay: "", benefits: "", imageUrls: "", badge: "",
+  });
+
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = () => {
+    if (!form.name || !form.price || !form.imageUrls) {
+      toast.error("Name, price, and at least one image URL are required."); return;
+    }
+    const id = `${form.category}-${form.name}`.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const images = form.imageUrls.split("\n").map((s) => s.trim()).filter(Boolean);
+    const benefits = form.benefits.split(",").map((s) => s.trim()).filter(Boolean);
+    onAdd({
+      id, category: form.category, name: form.name, subtitle: form.subtitle,
+      description: form.description, weight: form.weight,
+      benefits: benefits.length ? benefits : ["Natural", "Handcrafted"],
+      price: Number(form.price), priceDisplay: form.priceDisplay || `₹${form.price}`,
+      badge: form.badge || null, images,
+    });
+  };
+
+  const field = (label: string, key: keyof typeof form, placeholder = "", textarea = false) => (
+    <div className="space-y-1">
+      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</label>
+      {textarea
+        ? <textarea rows={3} placeholder={placeholder} value={form[key]} onChange={(e) => set(key, e.target.value)} className="w-full text-sm bg-muted/30 border border-border rounded-lg px-3 py-2 resize-none outline-none focus:ring-1 focus:ring-primary text-foreground" />
+        : <Input placeholder={placeholder} value={form[key]} onChange={(e) => set(key, e.target.value)} className="text-sm" />}
+    </div>
+  );
+
+  return (
+    <div className="bg-card border border-primary/20 rounded-2xl p-5 space-y-4">
+      <h3 className="font-semibold text-foreground">Add New Product</h3>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {field("Product Name *", "name", "e.g. Rose Bliss")}
+        {field("Subtitle", "subtitle", "e.g. Rose Cold Process Soap")}
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Category</label>
+          <select value={form.category} onChange={(e) => set("category", e.target.value)} className="w-full text-sm bg-muted/30 border border-border rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-primary text-foreground">
+            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        {field("Sizes Available", "weight", "e.g. Small (60g) / Medium (80g)")}
+        {field("Cart Price (₹) *", "price", "e.g. 180")}
+        {field("Price Display", "priceDisplay", "e.g. ₹130 – ₹250")}
+        {field("Badge", "badge", "e.g. New, Best Seller (optional)")}
+        {field("Benefits (comma-separated)", "benefits", "e.g. Moisturising, Brightening")}
+      </div>
+      {field("Description", "description", "Describe the product...", true)}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Image URLs (one per line) *</label>
+        <textarea rows={3} placeholder={"/soaps/rose.png\n/soaps/rose(2).png"} value={form.imageUrls} onChange={(e) => set("imageUrls", e.target.value)} className="w-full text-sm bg-muted/30 border border-border rounded-lg px-3 py-2 resize-none outline-none focus:ring-1 focus:ring-primary font-mono text-foreground" />
+        <p className="text-[11px] text-muted-foreground">Use paths like <code>/soaps/filename.png</code> for images in public/soaps/</p>
+      </div>
+      <div className="flex gap-2 pt-2">
+        <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90 text-primary-foreground"><Plus className="w-4 h-4 mr-1.5" />Add Product</Button>
+        <Button variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Products Section ──────────────────────────────────────────────────────────
+function ProductsSection() {
+  const { products, updatePrice, addProduct, deleteProduct, resetToDefaults } = useProducts();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editPrice, setEditPrice] = useState("");
+  const [editPriceDisplay, setEditPriceDisplay] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [filterCat, setFilterCat] = useState<string>("all");
+
+  const categories = Array.from(new Set(products.map((p) => p.category)));
+  const filtered = filterCat === "all" ? products : products.filter((p) => p.category === filterCat);
+
+  const startEdit = (p: Product) => { setEditingId(p.id); setEditPrice(String(p.price)); setEditPriceDisplay(p.priceDisplay); };
+  const saveEdit = (id: string) => {
+    const num = Number(editPrice);
+    if (!num || num < 1) { toast.error("Invalid price"); return; }
+    updatePrice(id, num, editPriceDisplay || `₹${num}`);
+    toast.success("Price updated!");
+    setEditingId(null);
+  };
+  const handleAdd = (p: Product) => { addProduct(p); setShowAdd(false); toast.success(`${p.name} added!`); };
+
+  return (
+    <div className="space-y-5">
+      {/* Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <button onClick={() => setFilterCat("all")} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${filterCat === "all" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground bg-muted/40"}`}>All ({products.length})</button>
+          {categories.map((c) => (
+            <button key={c} onClick={() => setFilterCat(c)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${filterCat === c ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground bg-muted/40"}`}>{c} ({products.filter((p) => p.category === c).length})</button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => setShowAdd(!showAdd)} className="bg-primary hover:bg-primary/90 text-primary-foreground"><Plus className="w-4 h-4 mr-1.5" />Add Product</Button>
+          <Button size="sm" variant="outline" onClick={() => { if (confirm("Reset all products to defaults? Admin price edits will be lost.")) { resetToDefaults(); toast.success("Reset to defaults."); } }}>Reset</Button>
+        </div>
+      </div>
+
+      {showAdd && <AddProductForm onAdd={handleAdd} onCancel={() => setShowAdd(false)} />}
+
+      {/* Product list */}
+      <div className="grid gap-3">
+        {filtered.map((p) => {
+          const isEditing = editingId === p.id;
+          return (
+            <Card key={p.id} className="border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  {/* Thumbnail */}
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted/30 flex-shrink-0">
+                    <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                      <div>
+                        <p className="font-semibold text-foreground truncate">{p.name}</p>
+                        <p className="text-xs text-muted-foreground">{p.category} • {p.images.length} photo{p.images.length !== 1 ? "s" : ""}</p>
+                      </div>
+                      {/* Price edit */}
+                      <div className="flex items-center gap-2">
+                        {isEditing ? (
+                          <>
+                            <div className="flex flex-col gap-1">
+                              <Input value={editPrice} onChange={(e) => setEditPrice(e.target.value)} className="w-24 h-7 text-sm" placeholder="Cart price" type="number" min={1} />
+                              <Input value={editPriceDisplay} onChange={(e) => setEditPriceDisplay(e.target.value)} className="w-28 h-7 text-xs" placeholder="Display e.g. ₹130–₹250" />
+                            </div>
+                            <button onClick={() => saveEdit(p.id)} className="w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600"><Check className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setEditingId(null)} className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-muted/80"><X className="w-3.5 h-3.5" /></button>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-right">
+                              <p className="font-bold text-foreground text-sm">{p.priceDisplay}</p>
+                              <p className="text-[11px] text-muted-foreground">cart: {formatINR(p.price)}</p>
+                            </div>
+                            <button onClick={() => startEdit(p)} className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => { if (confirm(`Delete ${p.name}?`)) { deleteProduct(p.id); toast.success("Deleted."); } }} className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {p.badge && <span className="mt-1 inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">{p.badge}</span>}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Admin Page ────────────────────────────────────────────────────────────────
+export default function AdminPage() {
+  return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-20">
         <section className="py-10">
           <div className="w-full px-2 xs:px-3 sm:px-4 max-w-5xl mx-auto">
-            <div className="flex items-center justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Admin Panel</h1>
-                <p className="text-sm text-muted-foreground">Click any order to see full delivery details.</p>
-              </div>
-              <Button variant="outline" onClick={load} disabled={loading}>
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
-              </Button>
+            <div className="mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Admin Panel</h1>
+              <p className="text-sm text-muted-foreground mt-1">Manage orders and products from here.</p>
             </div>
 
-            <Tabs defaultValue="pending">
-              <TabsList className="w-full justify-start mb-4">
-                <TabsTrigger value="pending">Pending ({byStatus.pending.length})</TabsTrigger>
-                <TabsTrigger value="confirmed">Confirmed ({byStatus.confirmed.length})</TabsTrigger>
-                <TabsTrigger value="shipped">Shipped ({byStatus.shipped.length})</TabsTrigger>
+            <Tabs defaultValue="orders">
+              <TabsList className="w-full justify-start mb-6 border-b border-border rounded-none bg-transparent p-0 gap-1">
+                <TabsTrigger value="orders" className="rounded-t-lg data-[state=active]:bg-card data-[state=active]:border data-[state=active]:border-b-card data-[state=active]:border-border px-5 py-2.5">
+                  📦 Orders
+                </TabsTrigger>
+                <TabsTrigger value="products" className="rounded-t-lg data-[state=active]:bg-card data-[state=active]:border data-[state=active]:border-b-card data-[state=active]:border-border px-5 py-2.5">
+                  🧼 Products
+                </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="pending">{renderList(byStatus.pending)}</TabsContent>
-              <TabsContent value="confirmed">{renderList(byStatus.confirmed)}</TabsContent>
-              <TabsContent value="shipped">{renderList(byStatus.shipped)}</TabsContent>
+              <TabsContent value="orders"><OrdersSection /></TabsContent>
+              <TabsContent value="products"><ProductsSection /></TabsContent>
             </Tabs>
           </div>
         </section>
