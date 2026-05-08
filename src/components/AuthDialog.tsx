@@ -63,7 +63,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       console.error("Login error details:", error);
       
       if (error.name === "TypeError" && error.message.includes("fetch")) {
-        toast.error("Cannot connect to server. Please ensure your backend is running at http://localhost:5000");
+        toast.error("Cannot connect to server. Please try again later.");
       } else {
         const errorMessage = error.message || "An error occurred. Please try again.";
         toast.error(errorMessage);
@@ -149,7 +149,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       console.error("Signup error details:", error);
       
       if (error.name === "TypeError" && error.message.includes("fetch")) {
-        toast.error("Cannot connect to server. Please ensure your backend is running at http://localhost:5000");
+        toast.error("Cannot connect to server. Please try again later.");
       } else {
         const errorMessage = error.message || "An error occurred. Please try again.";
         toast.error(errorMessage);
