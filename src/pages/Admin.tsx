@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/api";
 import { formatINR } from "@/lib/pricing";
 import { useProducts } from "@/contexts/ProductContext";
-import { categoryInfo, defaultProducts, Product } from "@/data/products";
+import { categoryInfo, defaultProducts, getMinPrice, getPriceDisplay, PlainProduct, Variant } from "@/data/products";
 import {
   Loader2, ShieldCheck, Truck, PackageCheck, ChevronDown,
   MapPin, Phone, User, Package, CreditCard, Pencil, Check, X,
@@ -194,28 +194,35 @@ function OrdersSection() {
 }
 
 // ── Add Product Form ──────────────────────────────────────────────────────────
-function AddProductForm({ onAdd, onCancel }: { onAdd: (p: Product) => void; onCancel: () => void }) {
+function AddProductForm({ onAdd, onCancel }: { onAdd: (p: PlainProduct) => void; onCancel: () => void }) {
   const categories = Object.keys(categoryInfo);
   const [form, setForm] = useState({
     name: "", subtitle: "", description: "", category: categories[0],
-    weight: "", price: "", priceDisplay: "", benefits: "", imageUrls: "", badge: "",
+    benefits: "", imageUrls: "", badge: "",
   });
+  // Dynamic variant rows: [{label, price}]
+  const [variantRows, setVariantRows] = useState([{ label: "Small (60g)", price: "" }, { label: "Medium (80g)", price: "" }]);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const setVLabel = (i: number, v: string) => setVariantRows((rows) => rows.map((r, idx) => idx === i ? { ...r, label: v } : r));
+  const setVPrice = (i: number, v: string) => setVariantRows((rows) => rows.map((r, idx) => idx === i ? { ...r, price: v } : r));
+  const addRow = () => setVariantRows((rows) => [...rows, { label: "", price: "" }]);
+  const removeRow = (i: number) => setVariantRows((rows) => rows.filter((_, idx) => idx !== i));
 
   const handleSubmit = () => {
-    if (!form.name || !form.price || !form.imageUrls) {
-      toast.error("Name, price, and at least one image URL are required."); return;
-    }
+    if (!form.name || !form.imageUrls) { toast.error("Name and at least one image URL are required."); return; }
+    const variants: Variant[] = variantRows
+      .filter((r) => r.label && r.price && Number(r.price) > 0)
+      .map((r) => ({ label: r.label, price: Number(r.price) }));
+    if (!variants.length) { toast.error("Add at least one size with a price."); return; }
     const id = `${form.category}-${form.name}`.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     const images = form.imageUrls.split("\n").map((s) => s.trim()).filter(Boolean);
     const benefits = form.benefits.split(",").map((s) => s.trim()).filter(Boolean);
     onAdd({
       id, category: form.category, name: form.name, subtitle: form.subtitle,
-      description: form.description, weight: form.weight,
+      description: form.description,
       benefits: benefits.length ? benefits : ["Natural", "Handcrafted"],
-      price: Number(form.price), priceDisplay: form.priceDisplay || `₹${form.price}`,
-      badge: form.badge || null, images,
+      badge: form.badge || null, images, variants,
     });
   };
 
@@ -241,13 +248,29 @@ function AddProductForm({ onAdd, onCancel }: { onAdd: (p: Product) => void; onCa
             <option value="Other">Other</option>
           </select>
         </div>
-        {field("Sizes Available", "weight", "e.g. Small (60g) / Medium (80g)")}
-        {field("Cart Price (₹) *", "price", "e.g. 180")}
-        {field("Price Display", "priceDisplay", "e.g. ₹130 – ₹250")}
         {field("Badge", "badge", "e.g. New, Best Seller (optional)")}
         {field("Benefits (comma-separated)", "benefits", "e.g. Moisturising, Brightening")}
       </div>
       {field("Description", "description", "Describe the product...", true)}
+
+      {/* Sizes & Prices */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sizes & Prices *</label>
+          <button onClick={addRow} className="text-xs text-primary hover:underline flex items-center gap-1"><Plus className="w-3 h-3" />Add size</button>
+        </div>
+        <div className="space-y-2">
+          {variantRows.map((row, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input placeholder="Size label e.g. Small (60g)" value={row.label} onChange={(e) => setVLabel(i, e.target.value)} className="text-sm flex-1" />
+              <span className="text-muted-foreground text-sm">₹</span>
+              <Input placeholder="Price" value={row.price} onChange={(e) => setVPrice(i, e.target.value)} className="text-sm w-24" type="number" min={1} />
+              {variantRows.length > 1 && <button onClick={() => removeRow(i)} className="text-muted-foreground hover:text-red-500"><X className="w-4 h-4" /></button>}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="space-y-1">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Image URLs (one per line) *</label>
         <textarea rows={3} placeholder={"/soaps/rose.png\n/soaps/rose(2).png"} value={form.imageUrls} onChange={(e) => set("imageUrls", e.target.value)} className="w-full text-sm bg-muted/30 border border-border rounded-lg px-3 py-2 resize-none outline-none focus:ring-1 focus:ring-primary font-mono text-foreground" />
@@ -263,25 +286,32 @@ function AddProductForm({ onAdd, onCancel }: { onAdd: (p: Product) => void; onCa
 
 // ── Products Section ──────────────────────────────────────────────────────────
 function ProductsSection() {
-  const { products, updatePrice, addProduct, deleteProduct, resetToDefaults } = useProducts();
+  const { products, updateVariants, addProduct, deleteProduct, resetToDefaults } = useProducts();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editPrice, setEditPrice] = useState("");
-  const [editPriceDisplay, setEditPriceDisplay] = useState("");
+  const [editVariants, setEditVariants] = useState<Variant[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [filterCat, setFilterCat] = useState<string>("all");
 
   const categories = Array.from(new Set(products.map((p) => p.category)));
   const filtered = filterCat === "all" ? products : products.filter((p) => p.category === filterCat);
 
-  const startEdit = (p: Product) => { setEditingId(p.id); setEditPrice(String(p.price)); setEditPriceDisplay(p.priceDisplay); };
+  const startEdit = (p: PlainProduct) => {
+    setEditingId(p.id);
+    setEditVariants(p.variants.map((v) => ({ ...v })));
+  };
+
   const saveEdit = (id: string) => {
-    const num = Number(editPrice);
-    if (!num || num < 1) { toast.error("Invalid price"); return; }
-    updatePrice(id, num, editPriceDisplay || `₹${num}`);
-    toast.success("Price updated!");
+    if (editVariants.some((v) => !v.price || v.price < 1)) { toast.error("All prices must be valid positive numbers."); return; }
+    updateVariants(id, editVariants);
+    toast.success("Prices updated!");
     setEditingId(null);
   };
-  const handleAdd = (p: Product) => { addProduct(p); setShowAdd(false); toast.success(`${p.name} added!`); };
+
+  const setVariantPrice = (i: number, price: number) => {
+    setEditVariants((prev) => prev.map((v, idx) => idx === i ? { ...v, price } : v));
+  };
+
+  const handleAdd = (p: PlainProduct) => { addProduct(p); setShowAdd(false); toast.success(`${p.name} added!`); };
 
   return (
     <div className="space-y-5">
@@ -302,48 +332,67 @@ function ProductsSection() {
       {showAdd && <AddProductForm onAdd={handleAdd} onCancel={() => setShowAdd(false)} />}
 
       {/* Product list */}
-      <div className="grid gap-3">
+      <div className="grid gap-4">
         {filtered.map((p) => {
           const isEditing = editingId === p.id;
           return (
             <Card key={p.id} className="border-border">
               <CardContent className="p-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-4">
                   {/* Thumbnail */}
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted/30 flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted/30 flex-shrink-0 mt-1">
                     <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                   </div>
-                  {/* Info */}
+
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
                       <div>
-                        <p className="font-semibold text-foreground truncate">{p.name}</p>
+                        <p className="font-semibold text-foreground">{p.name}</p>
                         <p className="text-xs text-muted-foreground">{p.category} • {p.images.length} photo{p.images.length !== 1 ? "s" : ""}</p>
+                        {!isEditing && <p className="text-sm font-medium text-primary mt-0.5">{getPriceDisplay(p)}</p>}
                       </div>
-                      {/* Price edit */}
-                      <div className="flex items-center gap-2">
-                        {isEditing ? (
-                          <>
-                            <div className="flex flex-col gap-1">
-                              <Input value={editPrice} onChange={(e) => setEditPrice(e.target.value)} className="w-24 h-7 text-sm" placeholder="Cart price" type="number" min={1} />
-                              <Input value={editPriceDisplay} onChange={(e) => setEditPriceDisplay(e.target.value)} className="w-28 h-7 text-xs" placeholder="Display e.g. ₹130–₹250" />
-                            </div>
-                            <button onClick={() => saveEdit(p.id)} className="w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600"><Check className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => setEditingId(null)} className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-muted/80"><X className="w-3.5 h-3.5" /></button>
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-right">
-                              <p className="font-bold text-foreground text-sm">{p.priceDisplay}</p>
-                              <p className="text-[11px] text-muted-foreground">cart: {formatINR(p.price)}</p>
-                            </div>
-                            <button onClick={() => startEdit(p)} className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => { if (confirm(`Delete ${p.name}?`)) { deleteProduct(p.id); toast.success("Deleted."); } }} className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
-                          </>
-                        )}
-                      </div>
+                      {!isEditing && (
+                        <div className="flex gap-2">
+                          <button onClick={() => startEdit(p)} className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:text-foreground transition" title="Edit prices"><Pencil className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => { if (confirm(`Delete ${p.name}?`)) { deleteProduct(p.id); toast.success("Deleted."); } }} className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:text-red-500 transition" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </div>
+                      )}
                     </div>
-                    {p.badge && <span className="mt-1 inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">{p.badge}</span>}
+
+                    {/* Variant price editor */}
+                    {isEditing ? (
+                      <div className="space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Edit price per size</p>
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          {editVariants.map((v, i) => (
+                            <div key={i} className="flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-2">
+                              <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">{v.label}</span>
+                              <span className="text-muted-foreground">₹</span>
+                              <Input
+                                type="number" min={1} value={v.price}
+                                onChange={(e) => setVariantPrice(i, Number(e.target.value))}
+                                className="h-8 w-24 text-sm"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                          <Button size="sm" onClick={() => saveEdit(p.id)} className="bg-green-600 hover:bg-green-700 text-white"><Check className="w-3.5 h-3.5 mr-1.5" />Save Prices</Button>
+                          <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Size price chips (read-only) */
+                      <div className="flex flex-wrap gap-1.5">
+                        {p.variants.map((v, i) => (
+                          <span key={i} className="px-2.5 py-1 bg-muted/40 text-xs font-medium rounded-lg border border-border/60 text-muted-foreground">
+                            {v.label}: <span className="text-foreground font-semibold">₹{v.price}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {p.badge && !isEditing && <span className="mt-2 inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">{p.badge}</span>}
                   </div>
                 </div>
               </CardContent>
