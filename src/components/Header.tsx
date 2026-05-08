@@ -59,7 +59,7 @@ const Header = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
-          ? "glass shadow-[0_4px_30px_hsl(145_28%_40%/0.1)] py-2"
+          ? "glass shadow-[0_4px_30px_hsl(145_28%_40%/0.15)] py-2"
           : "bg-transparent py-3"
       }`}
     >
@@ -73,17 +73,21 @@ const Header = () => {
               <img
                 src={logo}
                 alt="BRIMSTONE"
-                className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover transition-transform duration-300 group-hover:scale-110 ring-2 ring-primary/20"
+                className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover transition-transform duration-300 group-hover:scale-110 ring-2 ring-white/30"
               />
             </div>
             <div>
               <span
-                className="block text-sm sm:text-lg md:text-xl font-bold text-foreground tracking-widest"
+                className={`block text-sm sm:text-lg md:text-xl font-bold tracking-widest transition-colors duration-300 ${
+                  isScrolled ? "text-foreground" : "text-white"
+                }`}
                 style={{ fontFamily: "'Cormorant Garamond', serif", letterSpacing: "0.15em" }}
               >
                 BRIMSTONE
               </span>
-              <span className="text-[10px] text-muted-foreground hidden sm:block tracking-widest uppercase">
+              <span className={`text-[10px] hidden sm:block tracking-widest uppercase transition-colors duration-300 ${
+                isScrolled ? "text-muted-foreground" : "text-white/70"
+              }`}>
                 Spark of wild beauty
               </span>
             </div>
@@ -95,7 +99,9 @@ const Header = () => {
               <a
                 key={link.label}
                 href={link.href}
-                className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-300 group py-1"
+                className={`relative text-sm font-medium transition-colors duration-300 group py-1 ${
+                  isScrolled ? "text-muted-foreground hover:text-foreground" : "text-white/80 hover:text-white"
+                }`}
               >
                 {link.label}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-300 group-hover:w-full" />
@@ -111,7 +117,9 @@ const Header = () => {
                 if (!isAuthed) return setAuthDialogOpen(true);
                 window.location.href = "/cart";
               }}
-              className="relative p-2 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 group"
+              className={`relative p-2 rounded-full hover:bg-white/15 transition-all duration-300 group ${
+                isScrolled ? "text-muted-foreground hover:text-primary" : "text-white/80 hover:text-white"
+              }`}
             >
               <ShoppingBag className="w-5 h-5" />
               {count > 0 && (
@@ -124,7 +132,11 @@ const Header = () => {
             {!isAuthed ? (
               <button
                 onClick={() => setAuthDialogOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/40 text-primary text-sm font-medium hover:bg-primary/10 hover:border-primary transition-all duration-300 glass"
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-300 backdrop-blur-md ${
+                  isScrolled
+                    ? "border-primary/40 text-primary hover:bg-primary/10 hover:border-primary"
+                    : "border-white/40 text-white hover:bg-white/15 hover:border-white/70"
+                }`}
               >
                 <LogIn className="w-4 h-4" />
                 Sign In
