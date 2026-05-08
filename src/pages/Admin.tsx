@@ -407,7 +407,7 @@ function ProductsSection() {
 // ── Admin Page ────────────────────────────────────────────────────────────────
 export default function AdminPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
       <main className="pt-20">
         <section className="py-10">

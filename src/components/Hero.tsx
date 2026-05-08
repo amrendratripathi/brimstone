@@ -42,9 +42,9 @@ const Hero = () => {
       <div className="absolute inset-0 z-10 bg-gradient-to-br from-green-950/30 via-transparent to-transparent" />
 
       {/* ── Main hero content (two-column) ── */}
-      <div className="relative z-20 flex-1 flex items-center pt-24 pb-0">
-        <div className="w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
-          <div className="grid lg:grid-cols-2 gap-8 items-center min-h-[65vh]">
+      <div className="relative z-20 flex-1 flex items-center pt-20 pb-0">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-6 items-center min-h-[60vh] py-8 sm:py-12">
 
             {/* ── LEFT: Text & CTAs ── */}
             <div className="space-y-6 md:space-y-8">
@@ -68,7 +68,7 @@ const Hero = () => {
                 <Shuffle
                   text="BRIMSTONE"
                   tag="h1"
-                  className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-bold leading-none tracking-tight text-white drop-shadow-lg"
+                  className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight text-white drop-shadow-lg"
                   shuffleDirection="right"
                   duration={0.35}
                   stagger={0.03}
@@ -80,7 +80,7 @@ const Hero = () => {
                   rootMargin="-50px"
                 />
                 <h2
-                  className="text-2xl sm:text-3xl md:text-4xl font-light text-white/90 mt-2 leading-snug"
+                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-white/90 mt-2 leading-snug"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                 >
                   <span className="italic text-white/80">Spark of</span>{" "}
@@ -117,7 +117,7 @@ const Hero = () => {
               >
                 <a
                   href="/shop"
-                  className="group relative inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/40 text-white font-semibold text-sm hover:bg-white/25 hover:border-white/70 transition-all duration-300 hover:scale-[1.03] overflow-hidden"
+                  className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3.5 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/40 text-white font-semibold text-sm hover:bg-white/25 hover:border-white/70 transition-all duration-300 hover:scale-[1.03] overflow-hidden w-full sm:w-auto"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                   <span className="relative">Explore Collection</span>
@@ -125,7 +125,7 @@ const Hero = () => {
                 </a>
                 <a
                   href="#about"
-                  className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full border-2 border-white/25 text-white/80 font-semibold text-sm hover:border-white/50 hover:text-white transition-all duration-300 hover:scale-[1.02]"
+                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3.5 rounded-full border-2 border-white/25 text-white/80 font-semibold text-sm hover:border-white/50 hover:text-white transition-all duration-300 hover:scale-[1.02] w-full sm:w-auto"
                 >
                   Our Story
                   <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />

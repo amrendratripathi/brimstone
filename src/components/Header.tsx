@@ -5,6 +5,7 @@ import logo from "@/assets/logo.jpg";
 import AuthDialog from "@/components/AuthDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext.tsx";
+import { useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -13,6 +14,14 @@ const Header = () => {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const { isAuthed, role, signOut } = useAuth();
   const { count } = useCart();
+  const location = useLocation();
+
+  // Only the homepage gets the transparent-until-scroll hero treatment
+  const isHomePage = location.pathname === "/";
+  // Force opaque style on all non-home pages OR when scrolled
+  const forceOpaque = !isHomePage || isScrolled;
+  // Use dark (foreground) text when not on hero background
+  const useDarkText = forceOpaque;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,7 +67,7 @@ const Header = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
+        forceOpaque
           ? "glass shadow-[0_4px_30px_hsl(145_28%_40%/0.15)] py-2"
           : "bg-transparent py-3"
       }`}
@@ -73,20 +82,22 @@ const Header = () => {
               <img
                 src={logo}
                 alt="BRIMSTONE"
-                className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover transition-transform duration-300 group-hover:scale-110 ring-2 ring-white/30"
+                className={`relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover transition-transform duration-300 group-hover:scale-110 ring-2 ${
+                  useDarkText ? "ring-primary/20" : "ring-white/30"
+                }`}
               />
             </div>
             <div>
               <span
                 className={`block text-sm sm:text-lg md:text-xl font-bold tracking-widest transition-colors duration-300 ${
-                  isScrolled ? "text-foreground" : "text-white"
+                  useDarkText ? "text-foreground" : "text-white"
                 }`}
                 style={{ fontFamily: "'Cormorant Garamond', serif", letterSpacing: "0.15em" }}
               >
                 BRIMSTONE
               </span>
               <span className={`text-[10px] hidden sm:block tracking-widest uppercase transition-colors duration-300 ${
-                isScrolled ? "text-muted-foreground" : "text-white/70"
+                useDarkText ? "text-muted-foreground" : "text-white/70"
               }`}>
                 Spark of wild beauty
               </span>
@@ -100,7 +111,7 @@ const Header = () => {
                 key={link.label}
                 href={link.href}
                 className={`relative text-sm font-medium transition-colors duration-300 group py-1 ${
-                  isScrolled ? "text-muted-foreground hover:text-foreground" : "text-white/80 hover:text-white"
+                  useDarkText ? "text-muted-foreground hover:text-foreground" : "text-white/80 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -118,7 +129,7 @@ const Header = () => {
                 window.location.href = "/cart";
               }}
               className={`relative p-2 rounded-full hover:bg-white/15 transition-all duration-300 group ${
-                isScrolled ? "text-muted-foreground hover:text-primary" : "text-white/80 hover:text-white"
+                useDarkText ? "text-muted-foreground hover:text-primary" : "text-white/80 hover:text-white"
               }`}
             >
               <ShoppingBag className="w-5 h-5" />
@@ -133,7 +144,7 @@ const Header = () => {
               <button
                 onClick={() => setAuthDialogOpen(true)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-300 backdrop-blur-md ${
-                  isScrolled
+                  useDarkText
                     ? "border-primary/40 text-primary hover:bg-primary/10 hover:border-primary"
                     : "border-white/40 text-white hover:bg-white/15 hover:border-white/70"
                 }`}

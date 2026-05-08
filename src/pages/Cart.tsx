@@ -14,7 +14,7 @@ export default function CartPage() {
   const total = subtotal + gst + (items.length ? DELIVERY_CHARGE : 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
       <main className="pt-20">
         <section className="py-10">
@@ -116,4 +116,5 @@ export default function CartPage() {
     </div>
   );
 }
+
 

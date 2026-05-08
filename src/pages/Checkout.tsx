@@ -97,7 +97,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
       <main className="pt-20">
         <section className="py-10">
@@ -202,4 +202,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
 

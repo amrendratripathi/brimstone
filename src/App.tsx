@@ -14,6 +14,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ProductProvider } from "@/contexts/ProductContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import GlobalBackground from "@/components/GlobalBackground";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,8 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              {/* Global brim_bg2 background — visible on all non-home pages */}
+              <GlobalBackground />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/shop" element={<Shop />} />
