@@ -1,15 +1,11 @@
 /**
  * GlobalBackground — renders brim_bg2.png as a fixed, low-opacity background
- * on every page except the homepage hero (which has its own full-bleed image).
- * On the homepage it's still rendered but hidden behind the hero's own background.
+ * visible on all pages and all sections (Categories, About, Contact, Shop, etc).
+ * The Hero section's own full-bleed image sits at a higher z-index and covers
+ * this layer naturally in the hero area.
  */
-import { useLocation } from "react-router-dom";
 
 export default function GlobalBackground() {
-  const { pathname } = useLocation();
-  // On the homepage the hero covers everything; no need for bg2 there
-  const isHome = pathname === "/";
-
   return (
     <div
       aria-hidden
@@ -19,9 +15,7 @@ export default function GlobalBackground() {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        // Low opacity so content text/cards remain readable
-        opacity: isHome ? 0 : 0.5,
-        transition: "opacity 0.5s ease",
+        opacity: 0.5,
       }}
     />
   );

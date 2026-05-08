@@ -107,10 +107,12 @@
 
   html {
     scroll-behavior: smooth;
+    background-color: transparent;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: transparent;
     font-family: 'Inter', system-ui, sans-serif;
   }
 
