@@ -20,7 +20,7 @@ export default function GlobalBackground() {
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         // Low opacity so content text/cards remain readable
-        opacity: isHome ? 0 : 0.07,
+        opacity: isHome ? 0 : 0.5,
         transition: "opacity 0.5s ease",
       }}
     />
