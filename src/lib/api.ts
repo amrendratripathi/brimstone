@@ -1,7 +1,8 @@
-// Default to empty string so requests use relative paths and can go through Vite proxy.
-// If you want to use an absolute backend in some environments, set `VITE_API_BASE_URL`.
+// Backend URL — reads from env var first, falls back to the Render production URL.
+// VITE_API_BASE_URL can be set in .env (local) or Vercel dashboard (production).
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.toString().replace(/\/$/, "") || "";
+  import.meta.env.VITE_API_BASE_URL?.toString().replace(/\/$/, "") ||
+  "https://brim-backend-1.onrender.com";
 
 export type ApiErrorShape = {
   success?: boolean;
