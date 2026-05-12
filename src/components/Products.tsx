@@ -8,12 +8,9 @@ import eyesAndLipsImage from "@/assets/categories/eyes and lips.jpg";
 import giftImage from "@/assets/categories/gift.jpg";
 
 const categories = [
-  { name: "BODY", image: bodyImage, description: "Complete body care products", emoji: "🧴" },
-  { name: "HAIR", image: hairImage, description: "Natural hair care solutions", emoji: "✨" },
-  { name: "FACE", image: skinImage, description: "Skincare for radiant face", emoji: "🌸" },
-  { name: "DENTAL", image: dentalImage, description: "Natural oral care products", emoji: "🦷" },
-  { name: "EYES & LIPS", image: eyesAndLipsImage, description: "Delicate eye and lip care", emoji: "👁️" },
-  { name: "GIFT COMBOS", image: giftImage, description: "Perfect gift sets", emoji: "🎁" },
+  { name: "Cold Process Soaps", image: bodyImage, description: "Handcrafted using traditional methods, preserving all natural goodness", emoji: "🧼" },
+  { name: "Melt & Pour Soaps", image: skinImage, description: "Luxurious spa-quality soaps with natural extracts and designs", emoji: "✨" },
+  { name: "Oils", image: hairImage, description: "Pure, natural oils for skin care, hair care, and therapeutic wellness", emoji: "🌿" },
 ];
 
 const Products = () => {
@@ -50,7 +47,7 @@ const Products = () => {
               key={category.name}
               className="group relative cursor-pointer overflow-hidden rounded-2xl hover-lift animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
-              onClick={() => navigate("/shop")}
+              onClick={() => navigate("/shop", { state: { category: category.name } })}
             >
               {/* Image */}
               <div className="h-52 sm:h-64 md:h-80 relative overflow-hidden">

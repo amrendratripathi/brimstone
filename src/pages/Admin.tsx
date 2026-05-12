@@ -412,9 +412,14 @@ export default function AdminPage() {
       <main className="pt-20">
         <section className="py-10">
           <div className="w-full px-2 xs:px-3 sm:px-4 max-w-5xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Admin Panel</h1>
-              <p className="text-sm text-muted-foreground mt-1">Manage orders and products from here.</p>
+            <div className="mb-8 flex sm:items-center justify-between flex-col sm:flex-row gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Admin Panel</h1>
+                <p className="text-sm text-muted-foreground mt-1">Manage orders and products from here.</p>
+              </div>
+              <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <a href="/admin/referral">Manage Workers</a>
+              </Button>
             </div>
 
             <Tabs defaultValue="orders">

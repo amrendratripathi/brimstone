@@ -13,6 +13,7 @@ import { Loader2, MapPin } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { CouponInput, type AppliedCoupon } from "@/components/referral/CouponInput";
 
 type OrderCreatePayload = {
   items: { id: string; name: string; price: number; qty: number }[];
@@ -36,9 +37,12 @@ export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const [loading, setLoading] = useState(false);
 
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const couponDiscount = appliedCoupon?.discountAmount ?? 0;
+
   const gst = useMemo(() => calcGST(subtotal), [subtotal]);
   const delivery = items.length ? DELIVERY_CHARGE : 0;
-  const total = subtotal + gst + delivery;
+  const total = subtotal + gst + delivery - couponDiscount;
 
   const [fullName, setFullName] = useState(user?.name || "");
   const [mobile, setMobile] = useState(user?.mobileno || "");
@@ -78,7 +82,7 @@ export default function CheckoutPage() {
           pin: pin.replace(/\D/g, "").slice(0, 6),
           notes: notes.trim() || undefined,
         },
-        pricing: { subtotal, gst, delivery, total },
+        pricing: { subtotal, gst, delivery, total, couponCode: appliedCoupon?.coupon.code, couponDiscount },
       };
 
       const res = await apiRequest("/api/orders", { method: "POST", json: payload, auth: true });
@@ -163,6 +167,10 @@ export default function CheckoutPage() {
               <Card className="border-border h-fit sticky top-24 animate-fade-in">
                 <CardContent className="p-6 space-y-4">
                   <h2 className="text-xl font-bold text-foreground">Order summary</h2>
+
+                  {/* Coupon input */}
+                  <CouponInput subtotal={subtotal} onApply={setAppliedCoupon} />
+
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
@@ -176,9 +184,15 @@ export default function CheckoutPage() {
                       <span className="text-muted-foreground">Delivery</span>
                       <span className="text-foreground">{formatINR(delivery)}</span>
                     </div>
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                        <span>Coupon ({appliedCoupon?.coupon.code})</span>
+                        <span>−{formatINR(couponDiscount)}</span>
+                      </div>
+                    )}
                     <div className="border-t border-border pt-3 flex justify-between font-semibold">
                       <span>Total</span>
-                      <span>{formatINR(total)}</span>
+                      <span>{formatINR(Math.max(0, total))}</span>
                     </div>
                   </div>
 

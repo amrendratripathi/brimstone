@@ -1,7 +1,8 @@
+import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Leaf, Star, X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { ShoppingCart, Leaf, Star, X, ChevronLeft, ChevronRight, ZoomIn, Search } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useProducts } from "@/contexts/ProductContext";
 import { categoryInfo, getMinPrice, getPriceDisplay, PlainProduct } from "@/data/products";
@@ -183,11 +184,27 @@ const Shop = () => {
   const { products } = useProducts();
   const categories = Array.from(new Set(products.map((p) => p.category)));
   const { addItem } = useCart();
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const location = useLocation();
+  const [activeCategory, setActiveCategory] = useState<string | null>(
+    (location.state as any)?.category || null
+  );
+
+  useEffect(() => {
+    if ((location.state as any)?.category) {
+      setActiveCategory((location.state as any).category);
+    }
+  }, [location.state]);
   const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
   const [selectedProduct, setSelectedProduct] = useState<PlainProduct | null>(null);
 
-  const filtered = activeCategory ? products.filter((p) => p.category === activeCategory) : products;
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filtered = products.filter((p) => {
+    const matchCat = activeCategory ? p.category === activeCategory : true;
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   const handleAddToCart = useCallback((product: PlainProduct, variantIdx = 0) => {
     const variant = product.variants[variantIdx];
@@ -228,10 +245,10 @@ const Shop = () => {
           </div>
         </section>
 
-        {/* Filter tabs */}
+        {/* Filter & Search tabs */}
         <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="flex items-center gap-2 py-3 overflow-x-auto scrollbar-none">
+          <div className="container mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row gap-3 md:justify-between md:items-center">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 md:pb-0">
               <button
                 onClick={() => setActiveCategory(null)}
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${activeCategory === null ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
@@ -248,11 +265,27 @@ const Shop = () => {
                 </button>
               ))}
             </div>
+            
+            {/* Search Input */}
+            <div className="relative w-full md:w-64 flex-shrink-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="w-full pl-9 pr-4 py-2 rounded-full bg-muted/30 border border-border text-sm focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
           </div>
         </div>
 
         {/* Products by category */}
-        {(activeCategory ? [activeCategory] : categories).map((category) => (
+        {(activeCategory ? [activeCategory] : categories).map((category) => {
+          const categoryProducts = filtered.filter((p) => p.category === category);
+          if (categoryProducts.length === 0) return null; // hide if search yields no results for this category
+
+          return (
           <section key={category} className="py-14 md:py-20 relative" id={category.toLowerCase().replace(/\s+/g, "-")}>
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
             <div className="container mx-auto px-4 sm:px-6">
@@ -267,7 +300,7 @@ const Shop = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-                {filtered.filter((p) => p.category === category).map((product) => {
+                {categoryProducts.map((product) => {
                   const isAdded = addedMap[product.id];
                   const minPrice = getMinPrice(product);
                   const priceDisplay = getPriceDisplay(product);
@@ -343,7 +376,7 @@ const Shop = () => {
               </div>
             </div>
           </section>
-        ))}
+        )})}
 
         {/* WhatsApp CTA */}
         <section className="py-16 relative overflow-hidden">

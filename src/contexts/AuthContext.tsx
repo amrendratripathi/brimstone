@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { apiRequest } from "@/lib/api";
 
-export type UserRole = "user" | "admin";
+export type UserRole = "user" | "admin" | "worker";
 
 export type AuthUser = {
   id?: string;
@@ -41,7 +41,9 @@ function readUser(): AuthUser | null {
 
 function normalizeRole(role: AuthUser["role"]): UserRole {
   const r = (role || "user").toString().toLowerCase();
-  return r === "admin" ? "admin" : "user";
+  if (r === "admin") return "admin";
+  if (r === "worker") return "worker";
+  return "user";
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -73,7 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(() => {
-    const role = normalizeRole(user?.role);
+    const rawRole = (user as any)?.app_role || user?.role;
+    const role = normalizeRole(rawRole);
     return {
       token,
       user,

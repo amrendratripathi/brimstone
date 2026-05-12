@@ -55,6 +55,18 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         onOpenChange(false);
         setLoginEmail("");
         setLoginPassword("");
+        
+        // Redirect based on role
+        setTimeout(() => {
+          const userRole = user?.app_role || user?.role || "customer";
+          if (userRole === "admin") {
+            window.location.href = "/admin";
+          } else if (userRole === "worker") {
+            window.location.href = "/worker/dashboard";
+          } else {
+            window.location.href = "/account";
+          }
+        }, 100);
       } else {
         const data = (res as any).ok ? (res as any).data : (res as any).data;
         toast.error(data?.message || data?.error || "Login failed.");

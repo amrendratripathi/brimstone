@@ -170,6 +170,15 @@ const Header = () => {
                     Admin
                   </a>
                 )}
+                {role === "worker" && (
+                  <a
+                    href="/worker/dashboard"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-all duration-300"
+                  >
+                    <User className="w-4 h-4" />
+                    Worker
+                  </a>
+                )}
                 <button
                   onClick={signOut}
                   className="flex items-center gap-2 px-3 py-2 rounded-full text-muted-foreground text-sm hover:text-foreground transition-colors duration-300"
@@ -241,6 +250,17 @@ const Header = () => {
               >
                 <Shield className="w-4 h-4" />
                 Admin Panel
+              </a>
+            )}
+
+            {isAuthed && role === "worker" && (
+              <a
+                href="/worker/dashboard"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-foreground hover:text-primary hover:bg-primary/8 transition-all duration-200 font-medium text-sm"
+              >
+                <User className="w-4 h-4" />
+                Worker Dashboard
               </a>
             )}
 
