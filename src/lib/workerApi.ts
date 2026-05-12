@@ -189,10 +189,18 @@ export async function getTopWorkers(limit = 5) {
 }
 
 export async function getRevenueStats() {
-  const res = await apiRequest("/api/admin/analytics", { method: "GET" });
+  const res = await apiRequest("/api/admin/dashboard", { method: "GET" });
   if (res.ok && (res.data as any)?.success) {
-    const d = (res.data as any).analytics;
-    return { data: { totalRevenue: d.totalRevenue, totalCommissions: d.totalCommissions, totalOrders: d.totalOrders, pendingPayouts: d.pendingPayouts }, error: null };
+    const d = (res.data as any).dashboard;
+    return { 
+      data: { 
+        totalRevenue: d.total_revenue, 
+        totalCommissions: d.total_commissions, 
+        totalOrders: d.total_coupon_orders, 
+        pendingPayouts: d.pending_payouts 
+      }, 
+      error: null 
+    };
   }
   return { data: null, error: new Error("Failed to fetch stats") };
 }
