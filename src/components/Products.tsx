@@ -17,7 +17,7 @@ const Products = () => {
   const navigate = useNavigate();
 
   return (
-    <section id="products" className="py-20 md:py-28 relative overflow-hidden">
+    <section id="products" className="py-14 md:py-28 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-b from-muted/40 via-muted/20 to-background pointer-events-none" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -75,7 +75,7 @@ const Products = () => {
                     >
                       {category.name}
                     </h3>
-                    <p className="text-white/75 text-sm leading-snug mb-3">
+                    <p className="hidden sm:block text-white/75 text-sm leading-snug mb-3">
                       {category.description}
                     </p>
                     <div className="flex items-center gap-1.5 text-white/90 text-xs font-semibold tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">

@@ -3,7 +3,7 @@ import ceoImage from "@/assets/categories/CEO.png";
 
 const CEO = () => {
   return (
-    <section className="py-20 md:py-28 relative overflow-hidden">
+    <section className="py-14 md:py-28 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/3 to-muted/30 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.06)_0%,transparent_70%)] pointer-events-none" />

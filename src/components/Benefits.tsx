@@ -65,7 +65,7 @@ const Benefits = () => {
             Why Natural
           </p>
           <h2
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4"
+            className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             Natural Benefits
@@ -109,7 +109,7 @@ const Benefits = () => {
                   >
                     {benefit.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed hidden xs:block">
                     {benefit.description}
                   </p>
                 </div>

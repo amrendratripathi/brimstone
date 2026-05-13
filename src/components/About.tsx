@@ -7,15 +7,19 @@ const whyChooseUs = [
   "No Harmful Chemicals",
   "Eco-Friendly Packaging",
   "Cold Pressed Process",
-  "Rich in Natural Oils",
-  "Suitable for All Skin Types",
+  "100% Natural",
+  "Vegan",
+  "Handmade",
+  "No Chemicals",
+  "Eco-Friendly",
+  "Cold Pressed",
 ];
 
 const About = () => {
   return (
     <section
       id="about"
-      className="py-20 md:py-28 relative overflow-hidden"
+      className="py-14 md:py-28 relative overflow-hidden"
     >
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-muted/50 via-background to-muted/20 pointer-events-none" />

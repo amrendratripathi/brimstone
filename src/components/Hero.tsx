@@ -25,7 +25,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="relative min-h-screen flex flex-col overflow-hidden">
+    <section id="home" className="relative min-h-[80vh] md:min-h-screen flex flex-col overflow-hidden">
 
       {/* ── Full-bleed background image ── */}
       <div
@@ -132,9 +132,9 @@ const Hero = () => {
                 </a>
               </div>
 
-              {/* Feature pills */}
+              {/* Feature pills — Hidden on small mobile to keep it classy */}
               <div
-                className={`flex flex-wrap gap-3 pt-2 transition-all duration-700 delay-400 ${
+                className={`hidden md:flex flex-wrap gap-3 pt-2 transition-all duration-700 delay-400 ${
                   isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                 }`}
               >
