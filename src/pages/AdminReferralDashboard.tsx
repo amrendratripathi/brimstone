@@ -13,7 +13,7 @@ import type { Worker, PayoutRecord } from "@/lib/supabase";
 import {
   getAllWorkers, createWorker, updateWorker, deleteWorker,
   toggleWorkerStatus, getAllPayouts, updatePayoutStatus,
-  getAllCoupons, getRevenueStats, getTopWorkers,
+  getAllCoupons, getRevenueStats, getTopWorkers, getAllPurchases
 } from "@/lib/workerApi";
 import { StatCard } from "@/components/referral/StatCard";
 import { DataTable } from "@/components/referral/DataTable";
@@ -27,7 +27,7 @@ const fmt = (n: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 const fmtDate = (s?: string) => (s ? format(new Date(s), "dd MMM yy") : "—");
 
-type Tab = "workers" | "payouts" | "coupons" | "analytics";
+type Tab = "workers" | "sales" | "payouts" | "coupons" | "analytics";
 
 const EMPTY_WORKER: Partial<Worker> = {
   name: "", email: "", phone: "", coupon_code: "",
@@ -38,6 +38,7 @@ export default function AdminReferralDashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("workers");
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [sales, setSales] = useState<any[]>([]);
   const [payouts, setPayouts] = useState<(PayoutRecord & { workers?: { name: string; email: string } })[]>([]);
   const [coupons, setCoupons] = useState<unknown[]>([]);
   const [topWorkers, setTopWorkers] = useState<Worker[]>([]);
@@ -57,18 +58,20 @@ export default function AdminReferralDashboard() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [wRes, pRes, cRes, topRes, statsRes] = await Promise.all([
+    const [wRes, pRes, cRes, topRes, statsRes, sRes] = await Promise.all([
       getAllWorkers(search),
       getAllPayouts(),
       getAllCoupons(),
       getTopWorkers(5),
       getRevenueStats(),
+      getAllPurchases(),
     ]);
     if (wRes.data) setWorkers(wRes.data);
     if (pRes.data) setPayouts(pRes.data as typeof payouts);
     if (cRes.data) setCoupons(cRes.data);
     if (topRes.data) setTopWorkers(topRes.data);
     if (statsRes.data) setStats(statsRes.data);
+    if (sRes.data) setSales(sRes.data);
     setLoading(false);
   }, [search]);
 
@@ -225,7 +228,7 @@ export default function AdminReferralDashboard() {
 
           {/* Tabs */}
           <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 w-fit">
-            {(["workers", "payouts", "coupons", "analytics"] as Tab[]).map((t) => (
+            {(["workers", "sales", "payouts", "coupons", "analytics"] as Tab[]).map((t) => (
               <button key={t} onClick={() => setTab(t)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${tab === t ? "bg-violet-600 text-white shadow-lg" : "text-white/50 hover:text-white"}`}>
                 {t}
@@ -253,6 +256,44 @@ export default function AdminReferralDashboard() {
             >
               <DataTable columns={workerCols as Parameters<typeof DataTable>[0]["columns"]} data={workers as Record<string, unknown>[]} loading={loading}
                 emptyMessage="No workers found" emptyIcon={<Users className="w-10 h-10" />} rowKey={(r) => (r as Worker).id} />
+            </DashboardCard>
+          )}
+
+          {/* Sales Tab */}
+          {tab === "sales" && (
+            <DashboardCard
+              title="Referral Sales"
+              description="Individual transactions made using referral coupons"
+              noPadding
+            >
+              <DataTable
+                columns={[
+                  { key: "id", header: "Order ID", render: (r: any) => <span className="text-white font-medium">#{r.id.slice(-8).toUpperCase()}</span> },
+                  { key: "worker", header: "Worker", render: (r: any) => (
+                    <div>
+                      <p className="text-sm text-white">{r.workers?.users?.name || "—"}</p>
+                      <p className="text-xs text-white/40">{r.coupon_code}</p>
+                    </div>
+                  )},
+                  { key: "customer", header: "Customer", render: (r: any) => (
+                    <div>
+                      <p className="text-sm text-white">{r.customer?.name || "—"}</p>
+                      <p className="text-xs text-white/40">{r.customer?.email}</p>
+                    </div>
+                  )},
+                  { key: "final_amount", header: "Amount", render: (r: any) => <span className="font-semibold">{fmt(r.final_amount)}</span> },
+                  { key: "order_status", header: "Status", render: (r: any) => (
+                    <Badge variant={r.order_status === "delivered" ? "success" : r.order_status === "cancelled" ? "error" : "neutral"} dot>
+                      {r.order_status}
+                    </Badge>
+                  )},
+                  { key: "created_at", header: "Date", render: (r: any) => <span className="text-white/40 text-xs">{fmtDate(r.created_at)}</span> },
+                ]}
+                data={sales as Record<string, unknown>[]}
+                loading={loading}
+                emptyMessage="No referral sales found"
+                rowKey={(r) => (r as any).id}
+              />
             </DashboardCard>
           )}
 

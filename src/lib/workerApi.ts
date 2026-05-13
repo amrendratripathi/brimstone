@@ -125,8 +125,12 @@ export async function updatePayoutStatus(payoutId: string, status: PayoutRecord[
 
 // ─── COUPON QUERIES ──────────────────────────────────────────────────────────
 
-export async function validateCoupon(code: string) {
-  const res = await apiRequest("/api/coupons/validate", { method: "POST", auth: false, json: { couponCode: code, orderAmount: 100 } });
+export async function validateCoupon(code: string, amount: number = 0) {
+  const res = await apiRequest("/api/coupons/validate", {
+    method: "POST",
+    json: { couponCode: code, orderAmount: amount },
+    auth: true // Pass auth token if user is logged in
+  });
   if (res.ok && (res.data as any)?.success) {
     const data = res.data as any;
     return { 

@@ -38,7 +38,7 @@ export function CouponInput({ subtotal, onApply, className }: CouponInputProps) 
     setLoading(true);
     setError(null);
 
-    const { data, error: fetchErr } = await validateCoupon(code.trim());
+    const { data, error: fetchErr } = await validateCoupon(code.trim(), subtotal);
 
     setLoading(false);
 
