@@ -33,9 +33,9 @@ const Header = () => {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Categories", href: "#products" },
-    { label: "About", href: "#about" },
-    { label: "Contact", href: "#contact" },
+    { label: "Categories", href: "/#products" },
+    { label: "About", href: "/#about" },
+    { label: "Contact", href: "/#contact" },
   ];
 
   const mobileMenuSections = [
@@ -43,7 +43,7 @@ const Header = () => {
       title: "Shop",
       items: [
         { label: "All Products", href: "/shop" },
-        { label: "Categories", href: "#products" },
+        { label: "Categories", href: "/#products" },
       ],
     },
     {

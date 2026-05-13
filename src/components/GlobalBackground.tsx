@@ -5,7 +5,15 @@
  * this layer naturally in the hero area.
  */
 
+import { useLocation } from "react-router-dom";
+
 export default function GlobalBackground() {
+  const location = useLocation();
+  const isShopPage = location.pathname === "/shop";
+
+  // Hide on shop page as requested to keep it simple and readable
+  if (isShopPage) return null;
+
   return (
     <div
       aria-hidden
@@ -15,7 +23,7 @@ export default function GlobalBackground() {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        opacity: 0.5,
+        opacity: 0.15, // Reduced opacity for subtle texture
       }}
     />
   );

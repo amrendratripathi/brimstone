@@ -66,7 +66,7 @@ function GalleryModal({
               key={imgIdx}
               src={product.images[imgIdx]}
               alt={`${product.name} ${imgIdx + 1}`}
-              className="w-full h-full object-cover animate-fade-in"
+              className="w-full h-full object-contain p-4 md:p-8 animate-fade-in"
             />
             {total > 1 && (
               <>
@@ -321,10 +321,10 @@ const Shop = () => {
                         </div>
                       )}
 
-                      <div className="relative h-56 sm:h-60 overflow-hidden bg-muted/30">
-                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="relative aspect-[4/5] sm:h-60 overflow-hidden bg-muted/20 flex items-center justify-center p-3">
+                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" />
                         {product.images[1] && (
-                          <img src={product.images[1]} alt="" className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          <img src={product.images[1]} alt="" className="absolute inset-0 w-full h-full object-contain p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <div className="absolute bottom-3 right-3 z-10 px-3 py-1.5 glass rounded-full text-sm font-bold text-primary border border-primary/20 shadow-sm backdrop-blur">

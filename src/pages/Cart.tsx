@@ -45,7 +45,7 @@ export default function CartPage() {
                       <CardContent className="p-4 flex gap-4">
                         <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                           {it.image ? (
-                            <img src={it.image} alt={it.name} className="w-full h-full object-cover" />
+                            <img src={it.image} alt={it.name} className="w-full h-full object-contain p-1" />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10" />
                           )}

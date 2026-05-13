@@ -98,10 +98,13 @@ const Products = () => {
         <div className="text-center mt-10 md:mt-14">
           <a
             href="/shop"
-            className="group inline-flex items-center gap-3 px-8 py-3.5 rounded-full border-2 border-primary/40 text-primary font-semibold text-sm hover:bg-primary/8 hover:border-primary transition-all duration-300 glass"
+            className="group relative inline-flex items-center gap-3 px-10 py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_hsl(145_28%_40%/0.45)] hover:scale-[1.05]"
           >
-            View All Products
-            <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+            <span className="relative flex items-center gap-2">
+              Explore All Products
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+            </span>
           </a>
         </div>
       </div>
