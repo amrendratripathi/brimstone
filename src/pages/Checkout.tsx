@@ -87,7 +87,17 @@ export default function CheckoutPage() {
 
       const res = await apiRequest("/api/orders", { method: "POST", json: payload, auth: true });
       if (res.ok) {
-        toast.success("Order placed successfully!");
+        console.log("Order response:", res.data);
+        if (res.data?.referralStatus) {
+          if (res.data.referralStatus.success) {
+            toast.success("Order placed and referral tracked!");
+          } else {
+            console.warn("Referral failed:", res.data.referralStatus);
+            toast.info("Order placed, but referral tracking failed: " + (res.data.referralStatus.reason || res.data.referralStatus.error));
+          }
+        } else {
+          toast.success("Order placed successfully!");
+        }
         clear();
         navigate("/account");
       } else {
