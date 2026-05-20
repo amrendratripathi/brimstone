@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ShoppingCart, Leaf, Star, X, ChevronLeft, ChevronRight, Search, Shield, Award, BadgeCheck } from "lucide-react";
+import { ShoppingCart, Leaf, Star, ChevronLeft, Search, Shield, Award, BadgeCheck } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useProducts } from "@/contexts/ProductContext";
 import { categoryInfo, getMinPrice, getPriceDisplay, PlainProduct } from "@/data/products";
@@ -52,11 +52,13 @@ function ProductModal({
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  // Compute discount for display
-  const originalPrices: Record<number, number> = { 130: 180, 180: 240, 250: 350, 80: 110, 110: 149, 150: 200, 280: 370 };
-  const originalPrice = originalPrices[selectedVariant.price] ?? Math.round(selectedVariant.price * 1.35);
-  const discount = Math.round(((originalPrice - selectedVariant.price) / originalPrice) * 100);
-  const savings = originalPrice - selectedVariant.price;
+  // Intercept browser / hardware back button to close modal instead of navigating away
+  useEffect(() => {
+    history.pushState({ modalOpen: true }, "");
+    const onPop = () => onClose();
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [onClose]);
 
   return (
     <div
@@ -69,21 +71,24 @@ function ProductModal({
         style={{ maxHeight: "100dvh", height: "100dvh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Close button ── */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 left-3 z-30 w-9 h-9 flex items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 transition backdrop-blur-sm"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-
-        {/* Category label top-center */}
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white text-xs font-semibold">
-          {product.category}
+        {/* ── Sticky header bar (clears navbar) ── */}
+        <div className="flex-shrink-0 h-14 bg-background/95 backdrop-blur-md border-b border-border/30 flex items-center px-3 gap-3 z-30">
+          <button
+            onClick={onClose}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-muted/60 text-foreground hover:bg-muted transition"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="flex-1 text-sm font-semibold text-foreground truncate">{product.name}</span>
+          {product.badge && (
+            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest">
+              <Star className="w-2.5 h-2.5" fill="currentColor" />{product.badge}
+            </span>
+          )}
         </div>
 
         {/* ── Scrollable Body ── */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain pb-28 md:pb-24">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain pb-28 md:pb-24" style={{ WebkitOverflowScrolling: "touch" }}>
 
           {/* ── Image Gallery ── */}
           <div
@@ -92,6 +97,7 @@ function ProductModal({
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
+            {/* Badge inside gallery (since header bar handles it on mobile) */}
             <img
               key={imgIdx}
               src={product.images[imgIdx]}
@@ -171,10 +177,8 @@ function ProductModal({
             {/* Price row */}
             <div className="flex items-baseline gap-2.5 flex-wrap">
               <span className="text-3xl font-bold text-foreground">₹{selectedVariant.price}</span>
-              <span className="text-base text-muted-foreground line-through">₹{originalPrice}</span>
-              <span className="text-sm font-bold text-green-600">({discount}% OFF)</span>
+              <span className="text-sm text-muted-foreground font-medium">for {selectedVariant.label}</span>
             </div>
-            <p className="text-sm text-muted-foreground -mt-1">You save ₹{savings}</p>
 
             {/* ── Size/Variant Selector ── */}
             <div>
@@ -362,6 +366,7 @@ const Shop = () => {
   const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
   const [selectedProduct, setSelectedProduct] = useState<PlainProduct | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const savedScrollY = useRef(0);
 
   const filtered = products.filter((p) => {
     const matchCat = activeCategory ? p.category === activeCategory : true;
@@ -388,7 +393,11 @@ const Shop = () => {
       {selectedProduct && (
         <ProductModal
           product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
+          onClose={() => {
+            setSelectedProduct(null);
+            // Restore scroll position after modal closes
+            requestAnimationFrame(() => window.scrollTo({ top: savedScrollY.current, behavior: "instant" }));
+          }}
           onAddToCart={handleAddToCart}
         />
       )}
@@ -483,7 +492,7 @@ const Shop = () => {
                       key={product.id}
                       product={product}
                       isAdded={!!addedMap[product.id]}
-                      onOpen={() => setSelectedProduct(product)}
+                      onOpen={() => { savedScrollY.current = window.scrollY; setSelectedProduct(product); }}
                       onQuickAdd={(e) => { e.stopPropagation(); handleAddToCart(product); }}
                     />
                   ))}
