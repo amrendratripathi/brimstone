@@ -62,17 +62,26 @@ function ProductModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center"
+      className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center md:p-6"
       onClick={onClose}
     >
-      {/* Modal Container */}
+      {/* ═══════════════════════════════════════════════════════
+          MOBILE  — full-screen stacked layout
+          DESKTOP — centered two-column dialog
+         ═══════════════════════════════════════════════════════ */}
       <div
-        className="relative w-full md:max-w-4xl bg-background md:bg-card md:rounded-3xl md:shadow-2xl flex flex-col overflow-hidden"
-        style={{ maxHeight: "100dvh", height: "100dvh" }}
+        className={[
+          "relative w-full bg-background flex flex-col overflow-hidden",
+          // mobile: full-screen
+          "h-dvh max-h-dvh",
+          // desktop: compact centered dialog, two-column
+          "md:h-auto md:max-h-[90vh] md:max-w-5xl md:flex-row md:rounded-3xl md:shadow-2xl md:border md:border-border/50",
+        ].join(" ")}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Sticky header bar (clears navbar) ── */}
-        <div className="flex-shrink-0 h-14 bg-background/95 backdrop-blur-md border-b border-border/30 flex items-center px-3 gap-3 z-30">
+
+        {/* ── Mobile header bar (hidden on desktop) ── */}
+        <div className="md:hidden flex-shrink-0 h-14 bg-background/95 backdrop-blur-md border-b border-border/30 flex items-center px-3 gap-3 z-30">
           <button
             onClick={onClose}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-muted/60 text-foreground hover:bg-muted transition"
@@ -87,17 +96,16 @@ function ProductModal({
           )}
         </div>
 
-        {/* ── Scrollable Body ── */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain pb-28 md:pb-24" style={{ WebkitOverflowScrolling: "touch" }}>
+        {/* ── LEFT: Image panel ── */}
+        <div className="md:w-[48%] md:flex-shrink-0 md:flex md:flex-col md:border-r md:border-border/30 bg-muted/5">
 
-          {/* ── Image Gallery ── */}
+          {/* Image viewer */}
           <div
-            className="relative bg-muted/10 select-none"
+            className="relative select-none flex-shrink-0"
             style={{ aspectRatio: "1 / 1" }}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            {/* Badge inside gallery (since header bar handles it on mobile) */}
             <img
               key={imgIdx}
               src={product.images[imgIdx]}
@@ -106,7 +114,7 @@ function ProductModal({
               style={{ animation: "fadeIn 0.25s ease" }}
             />
 
-            {/* Nav arrows — desktop only */}
+            {/* Prev/Next — desktop */}
             {total > 1 && (
               <>
                 <button
@@ -124,9 +132,9 @@ function ProductModal({
               </>
             )}
 
-            {/* Dot indicators */}
+            {/* Dot indicators — mobile only */}
             {total > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                 {product.images.map((_, i) => (
                   <button
                     key={i}
@@ -137,17 +145,17 @@ function ProductModal({
               </div>
             )}
 
-            {/* Badge */}
+            {/* Badge — desktop overlay on image */}
             {product.badge && (
-              <div className="absolute top-3 right-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest shadow">
+              <div className="hidden md:flex absolute top-3 left-3 z-20 items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest shadow">
                 <Star className="w-2.5 h-2.5" fill="currentColor" />{product.badge}
               </div>
             )}
           </div>
 
-          {/* ── Thumbnail strip ── */}
+          {/* Thumbnail strip */}
           {total > 1 && (
-            <div className="flex gap-2 px-4 py-2.5 overflow-x-auto scrollbar-none border-b border-border/30">
+            <div className="flex gap-2 px-4 py-2.5 overflow-x-auto scrollbar-none border-t border-border/30">
               {product.images.map((img, i) => (
                 <button
                   key={i}
@@ -159,9 +167,23 @@ function ProductModal({
               ))}
             </div>
           )}
+        </div>
 
-          {/* ── Product Info ── */}
-          <div className="px-4 pt-4 pb-2 flex flex-col gap-3">
+        {/* ── RIGHT: Product details (scrollable) ── */}
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto overscroll-contain pb-24"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {/* Desktop close button */}
+          <button
+            onClick={onClose}
+            className="hidden md:flex absolute top-4 right-4 z-30 w-9 h-9 items-center justify-center rounded-full bg-muted/60 text-foreground hover:bg-muted transition"
+          >
+            <span className="text-lg leading-none">✕</span>
+          </button>
+
+          <div className="px-5 md:px-7 pt-5 md:pt-6 pb-4 flex flex-col gap-4">
 
             {/* Name & subtitle */}
             <div>
@@ -174,13 +196,13 @@ function ProductModal({
               <p className="text-sm text-primary/80 font-medium mt-0.5">{product.subtitle}</p>
             </div>
 
-            {/* Price row */}
+            {/* Price */}
             <div className="flex items-baseline gap-2.5 flex-wrap">
               <span className="text-3xl font-bold text-foreground">₹{selectedVariant.price}</span>
               <span className="text-sm text-muted-foreground font-medium">for {selectedVariant.label}</span>
             </div>
 
-            {/* ── Size/Variant Selector ── */}
+            {/* Size selector */}
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Select size</p>
               <div className="flex flex-wrap gap-2">
@@ -188,10 +210,11 @@ function ProductModal({
                   <button
                     key={i}
                     onClick={() => setVariantIdx(i)}
-                    className={`px-4 py-2 rounded-lg border-2 text-sm font-semibold transition-all duration-200 ${i === variantIdx
-                      ? "border-primary bg-primary/5 text-primary shadow-sm"
-                      : "border-border text-muted-foreground hover:border-primary/40"
-                      }`}
+                    className={`px-4 py-2 rounded-lg border-2 text-sm font-semibold transition-all duration-200 ${
+                      i === variantIdx
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    }`}
                   >
                     {v.label}
                   </button>
@@ -199,53 +222,58 @@ function ProductModal({
               </div>
             </div>
 
-            {/* ── Trust Badges ── */}
-            <div className="flex items-center justify-around py-3 border-y border-border/30 mt-1">
-              <div className="flex flex-col items-center gap-1 text-muted-foreground">
+            {/* Trust badges */}
+            <div className="flex items-center justify-around py-3 border-y border-border/30">
+              <div className="flex flex-col items-center gap-1">
                 <Award className="w-6 h-6 text-primary/60" />
-                <span className="text-[10px] font-semibold text-center leading-tight">Premium<br />Quality</span>
+                <span className="text-[10px] font-semibold text-muted-foreground text-center leading-tight">Premium<br />Quality</span>
               </div>
-              <div className="flex flex-col items-center gap-1 text-muted-foreground">
+              <div className="flex flex-col items-center gap-1">
                 <span className="text-2xl">🇮🇳</span>
-                <span className="text-[10px] font-semibold text-center leading-tight">Made<br />In India</span>
+                <span className="text-[10px] font-semibold text-muted-foreground text-center leading-tight">Made<br />In India</span>
               </div>
-              <div className="flex flex-col items-center gap-1 text-muted-foreground">
+              <div className="flex flex-col items-center gap-1">
                 <Shield className="w-6 h-6 text-primary/60" />
-                <span className="text-[10px] font-semibold text-center leading-tight">Secure<br />Checkout</span>
+                <span className="text-[10px] font-semibold text-muted-foreground text-center leading-tight">Secure<br />Checkout</span>
               </div>
-              <div className="flex flex-col items-center gap-1 text-muted-foreground">
+              <div className="flex flex-col items-center gap-1">
                 <BadgeCheck className="w-6 h-6 text-primary/60" />
-                <span className="text-[10px] font-semibold text-center leading-tight">100%<br />Natural</span>
+                <span className="text-[10px] font-semibold text-muted-foreground text-center leading-tight">100%<br />Natural</span>
               </div>
             </div>
 
-            {/* ── Product Details ── */}
+            {/* Description */}
             <div>
               <p className="text-sm font-semibold text-foreground mb-1.5">Product details</p>
               <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
             </div>
 
-            {/* ── Key Benefits ── */}
+            {/* Benefits */}
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Key Benefits:</p>
               <ul className="flex flex-col gap-1.5">
                 {product.benefits.map((b) => (
-                  <li key={b} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Leaf className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span><strong className="text-foreground font-semibold">{b.split(":")[0]}</strong>{b.includes(":") ? `: ${b.split(":")[1]}` : ""}</span>
+                  <li key={b} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <Leaf className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                    <span>
+                      <strong className="text-foreground font-semibold">{b.split(":")[0]}</strong>
+                      {b.includes(":") ? `: ${b.split(":")[1]}` : ""}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="text-xs text-muted-foreground mt-1">
+            <div className="text-xs text-muted-foreground">
               Category: <span className="text-foreground font-medium">{product.category}</span>
             </div>
           </div>
         </div>
 
-        {/* ── Sticky Bottom CTA ── */}
-        <div className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border/50 px-4 py-3 flex gap-3 safe-bottom">
+        {/* ── Sticky CTA bar ──
+            Mobile: spans full width
+            Desktop: only spans the right column (left: 48%) */}
+        <div className="absolute bottom-0 left-0 right-0 md:left-[48%] bg-background/95 backdrop-blur-md border-t border-border/50 px-4 py-3 flex gap-3 safe-bottom">
           <button
             onClick={() => { onAddToCart(product, variantIdx); onClose(); }}
             className="flex-1 py-3.5 rounded-xl border-2 border-primary text-primary font-bold text-sm tracking-wide transition-all duration-200 hover:bg-primary/5 active:scale-[0.98]"
@@ -297,13 +325,7 @@ function ProductCard({
           alt={product.name}
           className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
         />
-        {product.images[1] && (
-          <img
-            src={product.images[1]}
-            alt=""
-            className="absolute inset-0 w-full h-full object-contain p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-400"
-          />
-        )}
+
         {/* Price pill */}
         <div className="absolute bottom-2 right-2 px-2.5 py-1 rounded-full bg-background/90 backdrop-blur-sm text-primary text-xs font-bold border border-primary/20 shadow-sm">
           {priceDisplay}
