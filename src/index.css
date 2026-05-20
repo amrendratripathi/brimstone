@@ -198,4 +198,14 @@
     transform: translateY(-6px);
     box-shadow: var(--shadow-medium);
   }
+
+  /* Safe bottom padding for mobile home indicator */
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
 }
