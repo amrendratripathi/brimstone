@@ -426,26 +426,8 @@ const Shop = () => {
 
       <Header />
       <main id="home">
-        {/* ── Hero ── */}
-        <section className="pt-32 pb-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-background to-background pointer-events-none" />
-          <div className="relative container mx-auto px-4 sm:px-6 text-center">
-            <p className="text-xs tracking-[0.3em] uppercase text-primary/80 font-semibold mb-3">Natural & Handmade</p>
-            <h1
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
-            >
-              Our Products
-            </h1>
-            <div className="section-divider mb-6" />
-            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              Discover our complete collection of natural handmade skincare products.
-            </p>
-          </div>
-        </section>
-
         {/* ── Filter & Search ── */}
-        <div className="sticky top-16 z-30 bg-background/90 backdrop-blur-md border-b border-border/50 shadow-sm">
+        <div className="pt-32 pb-1 border-b border-border/30">
           <div className="container mx-auto px-4 sm:px-6 py-3 flex flex-col gap-2.5">
             {/* Category pills */}
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
@@ -488,25 +470,10 @@ const Shop = () => {
           return (
             <section
               key={category}
-              className="py-10 md:py-20 relative"
+              className="pt-8 pb-10 relative"
               id={category.toLowerCase().replace(/\s+/g, "-")}
             >
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
               <div className="container mx-auto px-4 sm:px-6">
-                {/* Category header */}
-                <div className="text-center mb-7 md:mb-14">
-                  <div className="text-3xl mb-2">{categoryInfo[category]?.emoji ?? "🌿"}</div>
-                  <h2
-                    className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2"
-                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
-                  >
-                    {category}
-                  </h2>
-                  <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                    {categoryInfo[category]?.description ?? "Natural handcrafted products made with love"}
-                  </p>
-                </div>
-
                 {/* 2-col grid on mobile, 3-col on md, 4-col on xl */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
                   {categoryProducts.map((product) => (

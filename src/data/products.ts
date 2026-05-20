@@ -195,7 +195,7 @@ export const defaultProducts: PlainProduct[] = [
   // ── Melt & Pour Soaps ────────────────────────────────────────────────────────
   {
     id: "melt-pour-soaps-scrubbing-bar",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Scrubbing Bar",
     subtitle: "Coffee & Oat Milk Melt & Pour Soap",
     description: "A perfect blend of rich coffee and soothing oat milk. Gently exfoliates while deeply nourishing your skin for a refreshing, spa-like experience with every wash.",
@@ -206,7 +206,7 @@ export const defaultProducts: PlainProduct[] = [
   },
   {
     id: "melt-pour-soaps-detox-skin-bar",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Detox Skin Bar",
     subtitle: "Activated Charcoal & Tea Tree Soap",
     description: "A powerful detoxifying soap infused with activated charcoal and tea tree essential oil to deeply cleanse and purify your skin. Perfect for oily and acne-prone skin.",
@@ -217,7 +217,7 @@ export const defaultProducts: PlainProduct[] = [
   },
   {
     id: "melt-pour-soaps-ubtan-bar",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Ubtan Bar",
     subtitle: "Traditional 11-Herb Ubtan Soap",
     description: "A traditional skincare blend crafted with 11 powerful herbs and pure Kasturi Haldi. Inspired by age-old ubtan recipes, it gives your skin a healthy, radiant, and refreshed look.",
@@ -228,7 +228,7 @@ export const defaultProducts: PlainProduct[] = [
   },
   {
     id: "melt-pour-soaps-brightening-bar",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Brightening Bar",
     subtitle: "Sandalwood & Saffron Soap",
     description: "A luxurious blend of sandalwood and saffron that gently cleanses while enhancing your skin's natural glow. Its soothing aroma relaxes the senses for a rich, spa-like bathing experience.",
@@ -239,7 +239,7 @@ export const defaultProducts: PlainProduct[] = [
   },
   {
     id: "melt-pour-soaps-skin-lightening-bar",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Skin Lightening Bar",
     subtitle: "Pomegranate & Licorice Soap",
     description: "A dreamy antioxidant soap infused with the goodness of pomegranate and licorice to give skin a natural glow and lightness. Gently cleanses and gives a fresh, natural look.",
@@ -250,7 +250,7 @@ export const defaultProducts: PlainProduct[] = [
   },
   {
     id: "melt-pour-soaps-anti-acne-bar",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Anti Acne Bar",
     subtitle: "Tulsi & Neem Herbal Soap",
     description: "A refreshing herbal soap infused with the goodness of Tulsi and Neem, known for their powerful antibacterial and purifying properties. Keeps skin clear, healthy, and naturally balanced.",
@@ -261,7 +261,7 @@ export const defaultProducts: PlainProduct[] = [
   },
   {
     id: "melt-pour-soaps-tan-removal-bar",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Tan Removal Bar",
     subtitle: "Orange & Papaya Soap",
     description: "A refreshing blend of citrusy orange and nourishing papaya. Designed to gently cleanse while giving your skin a natural glow. Leaves you feeling fresh, soft, and radiant after every wash.",
@@ -272,7 +272,7 @@ export const defaultProducts: PlainProduct[] = [
   },
   {
     id: "melt-pour-soaps-oat-milk",
-    category: "Melt & Pour Soaps",
+    category: "Glycerine Soaps",
     name: "Oat Milk Bar",
     subtitle: "Oat Milk Melt & Pour Soap",
     description: "A creamy, ultra-gentle soap enriched with pure oat milk that soothes, nourishes, and moisturises the skin. Perfect for sensitive skin — calms irritation, reduces redness, and leaves skin silky soft.",
@@ -336,7 +336,7 @@ export const categoryInfo: Record<string, { emoji: string; description: string }
     emoji: "🧼",
     description: "Handcrafted using traditional cold-press methods, preserving all natural goodness",
   },
-  "Melt & Pour Soaps": {
+  "Glycerine Soaps": {
     emoji: "✨",
     description: "Luxurious spa-quality soaps with natural extracts and beautiful designs",
   },
